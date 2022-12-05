@@ -1,0 +1,423 @@
+---
+title: "Bike Share Case Study - Cleaning Raw Data"
+author: "Phuc Le"
+date: "2022-11-09"
+output:
+  html_document: 
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/')
+```
+
+## Document Description
+
+This document is part of the final documentation for The Bike Share Case Study. Here, the cleaning process of raw data for subsequent analysis is detailed. This includes a description of the methodology, a display of written codes to achieve the cleaned datasets, and respective elaborations/remarks.
+
+## Description of Raw Data
+
+For this Case Study, 12 recent months of the [Ridership Record](https://divvy-tripdata.s3.amazonaws.com/index.html) of the fictional bike-sharing company Cyclistics is utilized. This data is made publicly available by Motivate International Inc. under this [Licencse](https://ride.divvybikes.com/data-license-agreement).
+
+The utilized raw datasets consists of information on all bike rides (or trips), made by Cyclistics' users in Chicago from 08.01.2021 to 07.31.2022. The datasets/ ridership record is stored by month in 12 downloadable .csv files. For each recorded rides, the following information may be recorded:
+
+-   Ride ID\
+-   Type of bike\
+-   Start time of the ride\
+-   End time of the ride\
+-   Start station of the ride (name, ID, latitude and longitude in separate columns)\
+-   End station of the ride (name, ID, latitude and longitude in separate columns)\
+-   Ridership Type (rider is a casual rider or a member of Cyclistics)
+
+## Data-cleaning Methodology
+
+The raw datasets are downloaded, then cleaned using R.
+
+A top-down approach is roughly adopted for cleaning the raw datasets. This means that higher-level, more consistent discrepancies are addressed before less obvious ones. Furthermore, detecting and removing discrepancies/invalid data takes precedent, following by editing and adding to the datasets. The specific data-cleaning procedure is outlined below:
+
+1.  Preparing R for cleaning data (install and load packages, update working directory)\
+2.  Download and Import all required datasets as dataframes (i.e., .csv files)\
+3.  Display and inspect "snippets" of the datasets for understanding and initial detection of discrepancies that would otherwise be more difficult to detect after combining, such as the data type in each column\
+4.  Combine the separated raw datasets into a single dataset/dataframe\
+5.  Remove empty spaces and empty rows/data points\
+6.  Remove duplicated data points (e.g., repeated ride IDs)\
+7.  Remove incomplete/invalid rows/ data points\
+8.  Change/Supplement data types (e.g., converting date data to different formats)\
+9.  [Optional] Manipulate data for subsequent analyses (e.g. adding columns of calculated values)\
+10. Save the cleaned dataset and other relevant datasets.\
+
+## Data-cleaning Process in R
+
+### Step 1. Preparing R for cleaning data
+
+#### 1.1 Install and load necessary R packages
+
+```{r Step 1.1/10, results="hide", message=FALSE, warning=FALSE}
+# Install tidyverse to get packages for everyday data analyses
+install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+
+# Install skimr to provide summary statistics about variables in data frames, tibbles, data tables and vectors
+install.packages("skimr", repos = "http://cran.us.r-project.org")
+
+# Install janitor for Examining and Cleaning Dirty Data.
+install.packages("janitor", repos = "http://cran.us.r-project.org")
+
+# Install geosphere for functions that compute various aspects of distance, direction, area, etc. for geographic (geodetic) coordinates.
+install.packages("geosphere", repos = "http://cran.us.r-project.org")
+
+# Load packages
+library(tidyverse)
+library(data.table)
+library(lubridate)
+library(ggplot2)
+library(skimr)
+library(janitor)
+library(dplyr)
+library(geosphere)
+```
+
+#### 1.2. Change and view working directory
+
+```{r Step 1.2/10, results= FALSE}
+getwd() #view path of current (initial) working directory
+
+setwd("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/")
+
+getwd() #view and confirm path of working directory
+```
+
+#### 1.3. [Optional] View the content of the working directory
+
+```{r Step 1.3/10}
+list.dirs() 
+```
+
+### Step 2. Import raw data of Cyclistics' ridership from 08.01.2021 to 07.31.2022 as dataframes
+
+```{r Step 2/10, results= FALSE}
+rides_2207 <- read.csv(file = "CS1_Bike-Share_Data/202207-divvy-tripdata.csv")
+rides_2206 <- read.csv(file = "CS1_Bike-Share_Data/202206-divvy-tripdata.csv")
+rides_2205 <- read.csv(file = "CS1_Bike-Share_Data/202205-divvy-tripdata.csv")
+rides_2204 <- read.csv(file = "CS1_Bike-Share_Data/202204-divvy-tripdata.csv")
+rides_2203 <- read.csv(file = "CS1_Bike-Share_Data/202203-divvy-tripdata.csv")
+rides_2202 <- read.csv(file = "CS1_Bike-Share_Data/202202-divvy-tripdata.csv")
+rides_2201 <- read.csv(file = "CS1_Bike-Share_Data/202201-divvy-tripdata.csv")
+rides_2112 <- read.csv(file = "CS1_Bike-Share_Data/202112-divvy-tripdata.csv")
+rides_2111 <- read.csv(file = "CS1_Bike-Share_Data/202111-divvy-tripdata.csv")
+rides_2110 <- read.csv(file = "CS1_Bike-Share_Data/202110-divvy-tripdata.csv")
+rides_2109 <- read.csv(file = "CS1_Bike-Share_Data/202109-divvy-tripdata.csv")
+rides_2108 <- read.csv(file = "CS1_Bike-Share_Data/202108-divvy-tripdata.csv")
+```
+
+### Step 3. Display and inspect imported dataframes
+
+#### 3.1 Test to confirm that all imported dataframes have the same column number and names
+
+```{r Step 3.1/10, results= FALSE}
+# Check number of columns using ncol()
+ncol(rides_2207)
+ncol(rides_2206)
+ncol(rides_2205)
+ncol(rides_2204)
+ncol(rides_2203)
+ncol(rides_2202)
+ncol(rides_2201)
+ncol(rides_2112)
+ncol(rides_2111)
+ncol(rides_2110)
+ncol(rides_2109)
+ncol(rides_2108)
+
+# Check column names using colnames()
+colnames(rides_2207)
+colnames(rides_2206)
+colnames(rides_2205)
+colnames(rides_2204)
+colnames(rides_2203)
+colnames(rides_2202)
+colnames(rides_2201)
+colnames(rides_2112)
+colnames(rides_2111)
+colnames(rides_2110)
+colnames(rides_2109)
+colnames(rides_2108)
+```
+
+#### 3.2. Summarize and inspect the consistency of the data types of the imported dataframes
+
+```{r Step 3.2/10, results= FALSE}
+coltype_rides_2207 <- data.frame(Type_rides_2207=sapply(rides_2207,class))
+coltype_rides_2206 <- data.frame(Type_rides_2206=sapply(rides_2206,class))
+coltype_rides_2205 <- data.frame(Type_rides_2205=sapply(rides_2205,class))
+coltype_rides_2204 <- data.frame(Type_rides_2204=sapply(rides_2204,class))
+coltype_rides_2203 <- data.frame(Type_rides_2203=sapply(rides_2203,class))
+coltype_rides_2202 <- data.frame(Type_rides_2202=sapply(rides_2202,class))
+coltype_rides_2201 <- data.frame(Type_rides_2201=sapply(rides_2201,class))
+coltype_rides_2112 <- data.frame(Type_rides_2112=sapply(rides_2112,class))
+coltype_rides_2111 <- data.frame(Type_rides_2111=sapply(rides_2111,class))
+coltype_rides_2110 <- data.frame(Type_rides_2110=sapply(rides_2110,class))
+coltype_rides_2109 <- data.frame(Type_rides_2109=sapply(rides_2109,class))
+coltype_rides_2108 <- data.frame(Type_rides_2108=sapply(rides_2108,class))
+
+coltype_all_df <- cbind(coltype_rides_2207, coltype_rides_2206, 
+                        coltype_rides_2205, coltype_rides_2204,  
+                        coltype_rides_2203, coltype_rides_2202,
+                        coltype_rides_2201, coltype_rides_2112,
+                        coltype_rides_2111, coltype_rides_2110,  
+                        coltype_rides_2109, coltype_rides_2108
+                        )
+
+coltype_all_df_transposed <- t(coltype_all_df)
+View(coltype_all_df_transposed) 
+```
+
+#### 3.3 Display data type table here in the Markdown document
+
+```{r Step 3.3/10}
+knitr::kable(coltype_all_df_transposed, caption = "Data types accross imported dataframes")
+```
+
+*Note: Before 2021, the IDs of start and end station are of numeric type. If ridership data up to 2020 were considered, the corresponding columns for start and end station ID in those imported dataframes should be updated to be of type character, to be consistent with post-2020 records. Such discrepancies could not be detected with functions like glimpse() after the subsequent step of combining dataframes.*
+
+### Step 4. Combine the raw (inspected) ridership dataframes into a single dataframe
+
+In case they are needed, dataframes for months in 2021 and 2022 are first combined separately, then combined together. Hindsight revealed that combining all dataframes at once is also sufficient.
+
+```{r Step 4/10}
+# Combine ridership dataframes from 2022
+rides_masterdf_2022 <- rbind(rides_2207, rides_2206, rides_2205, rides_2204, 
+                             rides_2203, rides_2202, rides_2201
+                             )
+
+# Combine ridership dataframes from 2021
+rides_masterdf_2021 <- rbind(rides_2112, rides_2111, rides_2110, rides_2109, 
+                             rides_2108
+                             )
+
+# Combine all ridership dataframes
+rides_masterdf <- rbind(rides_masterdf_2022, rides_masterdf_2021)
+
+# checked the newly combined dataframe
+glimpse(rides_masterdf) 
+```
+
+### Step 5. Remove empty spaces and rows/datapoints
+
+#### 5.1. Clean the column names
+
+```{r Step 5.1/10}
+rides_masterdf_cleaned <- clean_names(rides_masterdf) # column names now consist of only the _ character, numbers, and letters
+```
+
+#### 5.2. [Optional] Check occurence of things (e.g. blank cells)
+
+The following code would take a long time to run
+
+```{r Step 5.2/10, results= FALSE}
+tabyl(rides_masterdf_cleaned, "ride_id")
+tabyl(rides_masterdf_cleaned, "rideable_type")
+tabyl(rides_masterdf_cleaned, "start_lat")
+tabyl(rides_masterdf_cleaned, "ended_at")
+tabyl(rides_masterdf_cleaned, "start_station_name")
+tabyl(rides_masterdf_cleaned, "start_station_id")
+tabyl(rides_masterdf_cleaned, "end_station_name")
+tabyl(rides_masterdf_cleaned, "end_station_id")
+tabyl(rides_masterdf_cleaned, "start_lat")
+tabyl(rides_masterdf_cleaned, "start_lng")
+tabyl(rides_masterdf_cleaned, "end_lat")
+tabyl(rides_masterdf_cleaned, "end_lng")
+tabyl(rides_masterdf_cleaned, "member_casual")
+```
+
+#### 5.3. Remove empty rows/datapoints (and empty columns)
+
+```{r Step 5.3/10, results= FALSE}
+# Remove empty rows and columns
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>% 
+  remove_empty(whic=c("rows"))
+
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>% 
+  remove_empty(whic=c("cols"))
+```
+
+### Step 6. Remove duplicated data points
+
+Check and remove ride ID duplicates
+
+```{r Step 6/10}
+# Check for ride ID duplicates
+ride_id_check <- rides_masterdf_cleaned %>%
+  count(ride_id) %>%
+  filter(n > 1)
+head(ride_id_check)
+glimpse(ride_id_check)
+
+# Remove ride ID duplicates
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>%
+  distinct(ride_id, .keep_all = TRUE) 
+
+# Check for remaining ride ID duplicates post-removal
+ride_id_check_nodup <- rides_masterdf_cleaned %>%
+  count(ride_id) %>%
+  filter(n > 1)
+head(ride_id_check_nodup)
+glimpse(ride_id_check_nodup)
+```
+
+### Step 7. Remove incomplete/invalid rows/ data points
+
+#### 7.1. Remove rows with unknown start/end station names
+
+```{r Step 7.1/10}
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>%
+  filter(
+    !(is.na(start_station_name) | start_station_name == "")
+  ) %>% 
+  
+  filter(
+    !(is.na(end_station_name) | end_station_name == "")
+  )
+```
+
+#### 7.2. Remove rows that record test rides
+
+The observation of test rides in the data and its respective code for cleaning is adopted from the previous work of [Isabella Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html)
+
+```{r Step 7.2/10}
+# Remove test rides (isabella peel)
+capitalized_station_name_check <- rides_masterdf_cleaned %>% 
+  filter(
+    str_detect(start_station_name, "[:upper:]") & !str_detect(start_station_name,"[:lower:]")
+  ) %>%
+  
+  group_by(
+    start_station_name
+  ) %>%
+  
+  count(
+    start_station_name
+  )
+
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>%
+  filter(
+    !(str_detect(start_station_name, "[:upper:]")
+      & !str_detect(start_station_name, "[:lower:]"))
+  )
+```
+
+#### 7.3. Remove rows with no/incomplete coordinates for start and end stations
+
+```{r Step 7.3/10}
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>%
+  filter(!is.na(start_lng) | !is.na(start_lat) | !is.na(end_lng) | !is.na(end_lat))
+```
+
+### Step 8. Change and/or supplement data types
+
+Update data to appropriate types for subsequent calculations and manipulations; ensure chronological order of data through sorting (function arrange()).
+
+```{r Step 8/10}
+# Change start and end time to date/time from character to date (POSIX) type
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>%
+  mutate(started_at = as.POSIXct(started_at, format = "%Y-%m-%d %H:%M:%S"),
+         ended_at = as.POSIXct(ended_at, format = "%Y-%m-%d %H:%M:%S")
+         )
+
+# Order ride data by date 
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>%
+  arrange(started_at)
+```
+
+### Step 9. Perform preliminary calculations/ data manipulations
+
+#### 9.1 Calculate ride duration
+
+The code below cleaning is adopted from the previous work of [Isabella Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html)
+
+```{r Step 9.1/10}
+# Calculate ride duration
+  rides_masterdf_cleaned$ride_duration <- difftime(
+    rides_masterdf_cleaned$ended_at, 
+    rides_masterdf_cleaned$started_at,
+    units = "secs"
+  ) 
+  
+  # Change string type to numeric 
+  rides_masterdf_cleaned$ride_duration <- as.numeric(
+    as.character(rides_masterdf_cleaned$ride_duration)
+    )
+
+# Remove rows with negative ride duration
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>%
+  filter(!(ride_duration < 0))
+```
+
+#### 9.2. Calculate ride distance
+
+Ride distance is defined here as the geographical distance between the ride's start and end stations, calculated from their given latitude-longitude. Though not the length of the exact route taken by the rider, this data could provide some insights on the user's riding habits/intention.
+
+```{r Step 9.2/10}
+# Calculate ride distance 
+# NOTE: if a distance is 0, DO NOT remove it! riders may make a round trip!
+
+rides_masterdf_cleaned <- rides_masterdf_cleaned %>%
+  rowwise() %>% 
+  mutate(ride_distance = distHaversine(cbind(start_lng, start_lat), 
+                                       cbind(end_lng, end_lat)
+                                       )
+         )
+```
+
+
+### Step 10. Save the cleaned dataset and other relevant datasets.\
+
+#### 10.1. Save the cleaned dataset
+
+```{r Step 10.1/10, results= FALSE}
+fwrite(
+  rides_masterdf_cleaned, 
+  "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/rides_masterdf_cleaned_221030.csv", 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+```
+
+#### 10.2. Save relevant datasets
+
+```{r Step 10.2/10, results= FALSE}
+fwrite(
+  rides_masterdf, 
+  "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/rides_masterdf_221030.csv", 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+
+fwrite(
+  coltype_all_df_transposed, 
+  "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/coltype_all_df_transposed_221030.csv", 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+
+fwrite(
+  ride_id_check, 
+  "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/ride_id_check_221030.csv", 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+
+fwrite(
+  ride_id_check_nodup, 
+  "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/ride_id_check_nodup_221030.csv", 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+
+fwrite(
+  capitalized_station_name_check, 
+  "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/capitalized_station_name_check_221030.csv", 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+```

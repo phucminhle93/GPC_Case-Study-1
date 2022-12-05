@@ -1,0 +1,795 @@
+---
+title: "Bike Share Case Study - Data Visualization - Part 1"
+author: "Phuc Le"
+date: "2022-11-16"
+output:
+  html_document: 
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/')
+```
+
+## Document Description
+
+In this document, steps to create interactive visualizations (maps) of the popularity of Cyclistics' stations are detailed. This is the first in the two-part data-visualization process. The creation of other visualizations is executed and documented separately due to the length of the written codes and texts.
+
+## Summary of Process Input and Output
+
+The inputs of the overall data-visualization process are the ridership data tables produced and saved in the previous data-transformation process.
+
+The outputs are visualizations of this data set in the forms of various plots, charts, and maps. Subsequent analyses and answering of the Case Study's core question ("How do annual members & casual riders use Cyclistic bikes differently?") are based on the insights provided by these visualizations.
+
+## Methodology
+
+The visualization of Cyclistics' ridership data are carried out to help answer the Case Study's core question:
+
+*How do annual members & casual riders use Cyclistics bikes differently?*
+
+As explained in the previous data-transformation, the core question is addressed from the usage intensity, location, and time aspects of Cyclistics' service from 08.01.2021 to 07.31.2022. Based on this framework, a total of 14 visualizations was created using R (see table below). Unless specified, all visualization facilitate the comparison in the usage of Cyclistics' bike/services between member and casual riders.:
+
+| Nr. | Aspects          | Visualization                                                                  | Visualization Type                   | Interactive? |
+|-------------|-------------|----------------------|-------------|-------------|
+| 1   | Intensity of Use | Overall ridership                                                              | Pie Chart                            | No           |
+| 2   | Intensity of Use | Ridership per bike type                                                        | Stacked bar chart                    | No           |
+| 3   | Intensity of Use | Monthly ridership                                                              | Side-by-side bar chart               | No           |
+| 4   | Intensity of Use | Weekly ridership by weekday                                                    | Heat maps                            | No           |
+| 5   | Intensity of Use | Daily ridership by hour                                                        | Circular bar chart                   | No           |
+| 6   | Intensity of Use | Effect of weather on ridership                                                 | Scatter plots                        | No           |
+| 7   | Location         | Popularity of start stations among all ridership types by number of departures | Interactive maps and reference table | Yes          |
+| 8   | Location         | Popularity of end stations among all ridership types by number of arrivals     | Interactive maps and reference table | Yes          |
+| 9   | Location         | Popularity of start stations among member riders by number of departures       | Interactive maps and reference table | Yes          |
+| 10  | Location         | Popularity of end stations among member riders by number of arrivals           | Interactive maps and reference table | Yes          |
+| 11  | Location         | Popularity of start stations among casual riders by number of departures       | Interactive maps and reference table | Yes          |
+| 12  | Location         | Popularity of end stations among casual riders by number of arrivals           | Interactive maps and reference table | Yes          |
+| 13  | Location         | Monthly mean ride distance with corresponding standard deviation values        | Side-by-side bar charts              | No           |
+| 14  | Time             | Monthly mean ride duration with corresponding standard deviation values        | Side-by-side bar charts              | No           |
+
+: Table 1. Visualizations for the Bike Share Case Study
+
+This document details the creation of the interactive maps (visualizations 7-12 in the table above). The idea to analyze, transform and visualize data in this direction as well as its execution is adapted and expanded from the previous work of [Isabella Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html).
+
+## Terminology
+
+As clarified in the previous document, the following terms are often used in completing the Bike Share Case Study :
+
+-   Rides (or trips): a single, recorded use of Cyclistics' bike for traveling
+
+-   Ridership: the number of rides
+
+-   Ridership Type: the type of the rider (casual or member) who completed a ride
+
+## Data-visualization Process in R
+
+### 1. Preparing R for data visualization
+
+#### 1.1 Install and load necessary R packages
+
+```{r Install-and-load-packages, results='hide', message=FALSE, warning=FALSE}
+# Install tidyverse to get packages for everyday data analyses
+install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+
+# Install skimr to provide summary statistics about variables in data frames, tibbles, data tables and vectors
+install.packages("skimr", repos = "http://cran.us.r-project.org")
+
+# Install janitor for Examining and Cleaning Dirty Data (when needed)
+install.packages("janitor", repos = "http://cran.us.r-project.org")
+
+# Install geosphere for functions that compute various aspects of distance, direction, area, etc. for geographic (geodetic) coordinates (when needed)
+install.packages("geosphere", repos = "http://cran.us.r-project.org")
+
+# Install viridis to get various color palettes for used visualizations
+install.packages("viridis", repos = "http://cran.us.r-project.org")
+
+# Install leaflet for the creation of interactive maps
+install.packages("leaflet", repos = "http://cran.us.r-project.org")
+
+# Load packages
+library(tidyverse)
+library(data.table)
+library(lubridate)
+library(ggplot2)
+library(skimr)
+library(janitor)
+library(dplyr)
+library(geosphere)
+library(viridis) # color palettes
+library(ggpubr) # added functions to ggplot2
+library(leaflet) # for geographical map
+library(crosstalk) # for sliders on geographical map
+library(DT) #for visualized data tables 
+library(htmlwidgets) # for widgets on maps
+library(htmltools) #tools for creating, manipulating, and writing HTML from R
+```
+
+#### 1.2. Change and view working directory
+
+```{r Change-working-directory, results= FALSE}
+getwd() #view path of current (initial) working directory
+
+setwd("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone")
+
+getwd() #view and confirm path of working directory
+```
+
+#### 1.3. [Optional] View the content of the working directory
+
+```{r List content of directory}
+list.dirs() 
+```
+
+### 2. Import cleaned ridership data as dataframes
+
+```{r Load-transformed-dataset-as-dataframes, results= FALSE}
+# Load all dataframes from analysis
+# Use fread instead of read.csv to achieve the same outcome faster
+df_names <- df_names <- c("rides_cleaned",
+                          
+                          "rides_v_riderships",
+                          
+                          "rides_v_YMD",
+                          "rides_v_YMD_casual",
+                          "rides_v_YMD_member",
+                          
+                          "rides_v_hr",
+                          "rides_v_hr_casual",
+                          "rides_v_hr_member",
+                          
+                          "rides_v_month",
+                          "rides_v_month_casual",
+                          "rides_v_month_member",
+                          
+                          "rides_v_type",
+                          "rides_v_type_casual",
+                          "rides_v_type_member",
+                          
+                          "rides_v_weather",
+                          
+                          "rides_v_startstation",
+                          "rides_v_startstation_all",
+                          "rides_v_startstation_casual",
+                          "rides_v_startstation_member",
+                          
+                          "rides_v_endstation",
+                          "rides_v_endstation_all",
+                          "rides_v_endstation_casual",
+                          "rides_v_endstation_member",
+                          
+                          "rides_duration_distance",
+                          "rides_duration_distance_perMonth",
+                          "rides_duration_distance_byHr",
+                          "rides_duration_distance_perWeekday"
+                          )
+
+for(i in 1:length(df_names)){
+  assign(df_names[i], 
+         fread(paste0("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/",
+                         df_names[i],
+                         ".csv")))}
+```
+
+### 3. Interactive maps (IMs) showing the popularity of Cyclistics' stations
+
+All interactive maps (IMs) created here show the popularity of stations for different ridership types. As such, their creations are the same in terms of steps and used functions. The general procedure used to create an IM is:
+
+1.  Prepare visualization elements (i.e., value scale, color palettes, and interactive texts)
+
+2.  Load data into the "crosstalk" widget
+
+3.  Set up the crosstalk widget (i.e., division and dimension of columns)
+
+4.  Populate each column of the widget with the desired interactive element (i.e., slider bar, geographical map, reference table)
+
+5.  Display the resulting widget/IM
+
+6.  (Manually) Save the resulting widget/IM as an .html file
+
+For the sake of retaining knowldge, the codes to create the first four IMs (visualizations 7-10 in Table 1) are comprehensively commented. Comments are omitted for the remaining codes (visualizations 11 and 12 in Table 1) to reduce redundancy, as they are practically the same as the preceding codes.
+
+#### 3.1 IM: Popularity of start stations among all ridership types by number of departures
+
+```{r Start-stations-all}
+# Create a value scale showing the number of rides (departures/arrivals) of each station
+mybins_startstation <- seq(0, 77040, by = 12840)
+
+# Apply the viridis colour palette to reflect the stations' popularity among riders 
+mypalette <- colorBin(
+  palette ="viridis",
+  domain = rides_v_startstation_all$numtrips,
+  na.color = "transparent", 
+  bins = mybins_startstation
+)
+
+# Prepare interactive texts for each station
+mytext <- paste(
+  "Station name: ", rides_v_startstation_all$start_station_name, "<br/>",
+  "Number of trips: ", rides_v_startstation_all$numtrips, sep = "" 
+) %>%
+  lapply(htmltools::HTML)
+
+# Load desired dataframes into the interactive crosstalk environment (package: crosstalk)
+pop_startstation <- SharedData$new(rides_v_startstation_all)
+
+# Create an interactive html leaflet widget to show the stations' popularity
+pop_startstation_map <- bscols(
+  
+  ## Specify the columns and their widths to house each interactive elements (slider, map, ref. table)
+  widths = c(12), # one single column with max width 12, 
+  
+  ## Specify what would happen to the interactive elements when the size of the html window changes
+  device = c("lg"),
+  
+  ## In a crosstalk widget, elements are arranged by columns by default
+  ## To arrange element within the same column, put them in a list()
+  ## Create a list to add a slider bar on top of the interactive map and a reference table at the bottom
+  list(
+    ## Add a slider to interact with the number of trips (column 1 of the widget)
+    filter_slider("numtrips", 
+                  "Number of trips/departures", 
+                  pop_startstation, 
+                  column=~numtrips,
+                  min = 0,
+                  step=50, 
+                  width=200
+                  ),
+    ## Create an interactive map (column 2 of the widget)
+    leaflet(pop_startstation) %>%
+      addTiles() %>%
+      
+      ### Set coordinates over the city of Chicago
+      setView(lng = -87.6298, lat = 41.8781, zoom = 12.0 
+              ) %>% 
+      
+      ### Set map style
+      addProviderTiles("Esri.WorldGrayCanvas") %>% 
+      
+      ### Add circle markers to represent each station, 
+      ### fill colour to show the popularity of each station, 
+      ### and interactive tooltip
+      addCircleMarkers(
+        ~ start_lng, ~ start_lat, 
+        fillColor = ~ mypalette(numtrips), 
+        fillOpacity = 0.7, 
+        color = "white", 
+        radius = 6, 
+        stroke = FALSE,
+        label = mytext,
+        labelOptions = labelOptions(
+          style = list( 
+            "font-weight" = "normal", 
+            padding = "3px 8px"
+          ), 
+          textsize = "13px", 
+          direction = "auto"
+        ) 
+      ) %>% 
+      
+      
+      ### Add a legend
+      addLegend( 
+        pal = mypalette, 
+        values = ~ numtrips, 
+        opacity = 0.8,
+        title = "Trips/Departures - All Riderships", 
+        position = "bottomright"
+      ),
+  
+    ## Add a reference data table next to the map (column 3 of the widget)
+    datatable(pop_startstation, 
+              extensions="Scroller", 
+              width="100%",
+              class="compact cell-border", 
+              options=list(columnDefs = list(list(visible=FALSE, targets=c(2,3)), list(width = "10%", targets=c(1))),
+                           deferRender=TRUE, 
+                           scrollY=300, 
+                           scroller=TRUE)
+              )
+    )
+  )
+
+# Display resulting interactive widget (html format) in RStudio.
+pop_startstation_map
+
+# Note: The html widget is to be exported and saved manually from the "Viewer" tan in RStudio
+```
+
+#### 3.2 IM: Popularity of end stations among all ridership types by number of arrivals
+
+```{r End-stations-all}
+# Create a value scale showing the number of rides (departures/arrivals) of each station
+mybins_endstation <- seq(0, 78600, by = 13100)
+
+# Apply the viridis colour palette to reflect the stations' popularity among riders  
+mypalette <- colorBin(
+  palette ="viridis",
+  domain = rides_v_endstation_all$numtrips,
+  na.color = "transparent", 
+  bins = mybins_endstation
+)
+
+# Prepare interactive texts for each station
+mytext <- paste(
+  "Station name: ", rides_v_endstation_all$end_station_name, "<br/>",
+  "Number of trips: ", rides_v_endstation_all$numtrips, sep = "" 
+) %>%
+  lapply(htmltools::HTML)
+
+# Load desired dataframes into the interactive crosstalk environment (package: crosstalk)
+pop_endstation <- SharedData$new(rides_v_endstation_all)
+
+# Create an interactive html leaflet widget to show the stations' popularity
+pop_endstation_map <- bscols(
+  
+  ## Specify the columns and their widths to house each interactive elements (slider, map, ref. table)
+  widths = c(12), # one single column with max width 12
+  
+  ## Specify what would happen to the interactive elements when the size of the html window changes
+  device = c("lg"),
+
+  ## In a crosstalk widget, elements are arranged by columns by default
+  ## To arrange element within the same column, put them in a list()
+  ## Create a list to add a slider bar on top of the interactive map and a reference table at the bottom
+  list(
+    ## Add a slider to interact with the number of trips (column 1 of the widget)
+    filter_slider("numtrips", 
+                  "Number of trips/arrivals", 
+                  pop_endstation, 
+                  column=~numtrips,
+                  min = 0,
+                  step=50, 
+                  width=200
+    ),
+    
+    ## Create an interactive map (column 2 of the widget)
+    leaflet(pop_endstation) %>%
+      addTiles() %>%
+      
+      ### Set coordinates over the city of Chicago
+      setView(lng = -87.6298, lat = 41.8781, zoom = 12.0 
+      ) %>%
+      
+      ### Set map style
+      addProviderTiles("Esri.WorldGrayCanvas") %>%
+      
+      ### Add circle markers to represent each station, 
+      ### fill colour to show the popularity of each station, 
+      ### and interactive tooltip
+      addCircleMarkers(
+        ~ end_lng, ~ end_lat, 
+        fillColor = ~ mypalette(numtrips), 
+        fillOpacity = 0.7, 
+        color = "white", 
+        radius = 6, 
+        stroke = FALSE,
+        label = mytext,
+        labelOptions = labelOptions(
+          style = list( 
+            "font-weight" = "normal", 
+            padding = "3px 8px"
+          ), 
+          textsize = "13px", 
+          direction = "auto"
+        ) 
+      ) %>%
+      
+      ### Add a legend
+      addLegend( 
+        pal = mypalette, 
+        values = ~ numtrips, 
+        opacity = 0.8,
+        title = "Trips/Arrivals - All Riderships", 
+        position = "bottomright"
+      ),
+  
+    ## Add a reference data table next to the map (column 3 of the widget)
+    datatable(pop_endstation, 
+              extensions="Scroller", 
+              width="100%",
+              class="compact cell-border",
+              options=list(columnDefs = list(list(visible=FALSE, targets=c(2,3)), 
+                                             list(width = "10%", targets=c(1))),
+                           deferRender=TRUE, 
+                           scrollY=300, 
+                           scroller=TRUE)
+    )
+  )
+)
+
+# Display resulting interactive widget (html format) in RStudio.
+pop_endstation_map
+
+# Note: The html widget is to be exported and saved manually from the "Viewer" tan in RStudio
+```
+
+#### 3.3 IM: Popularity of start stations among member riders by number of departures
+
+```{r Start-stations-member}
+# Create a value scale showing the number of rides (departures/arrivals) of each station
+mybins_startstation_mem <- seq(0, 25320, by = 4220)
+
+# Apply the viridis colour palette to reflect the stations' popularity among riders 
+mypalette <- colorBin(
+  palette ="viridis",
+  domain = rides_v_startstation_member$numtrips,
+  na.color = "transparent", 
+  bins = mybins_startstation_mem
+)
+
+# Prepare interactive texts for each station
+mytext <- paste(
+  "Station name: ", rides_v_startstation_member$start_station_name, "<br/>",
+  "Number of trips: ", rides_v_startstation_member$numtrips, sep = "" 
+) %>%
+  lapply(htmltools::HTML)
+
+# Load desired dataframes into the interactive crosstalk environment (package: crosstalk)
+pop_startstation_mem <- SharedData$new(rides_v_startstation_member)
+
+# Create an interactive html leaflet widget to show the stations' popularity
+pop_startstation_mem_map <- bscols(
+  
+  ## Specify the columns and their widths to house each interactive elements (slider, map, ref. table)
+  widths = c(12), # one single column with max width 12
+  
+  ## Specify what would happen to the interactive elements when the size of the html window changes
+  device = c("lg"),
+  
+  ## In a crosstalk widget, elements are arranged by columns by default
+  ## To arrange element within the same column, put them in a list()
+  ## Create a list to add a slider bar on top of the interactive map and a reference table at the bottom
+    list(
+    ## Add a slider to interact with the number of trips (column 1 of the widget)
+    filter_slider("numtrips", 
+                  "Number of trips/departures", 
+                  pop_startstation_mem, 
+                  column=~numtrips,
+                  min = 0,
+                  step=50, 
+                  width=200
+    ),
+    
+    ## Create an interactive map (column 2 of the widget)
+    leaflet(pop_startstation_mem) %>%
+      addTiles() %>%
+      
+      ### Set coordinates over the city of Chicago
+      setView(lng = -87.6298, lat = 41.8781, zoom = 12.0 
+      ) %>%
+      
+      ### Set map style
+      addProviderTiles("Esri.WorldGrayCanvas") %>%
+      
+      ### Add circle markers to represent each station, 
+      ### fill colour to show the popularity of each station, 
+      ### and interactive tooltip
+      addCircleMarkers(
+        ~ start_lng, ~ start_lat, 
+        fillColor = ~ mypalette(numtrips), 
+        fillOpacity = 0.7, 
+        color = "white", 
+        radius = 6, 
+        stroke = FALSE,
+        label = mytext,
+        labelOptions = labelOptions(
+          style = list( 
+            "font-weight" = "normal", 
+            padding = "3px 8px"
+          ), 
+          textsize = "13px", 
+          direction = "auto"
+        ) 
+      ) %>%
+      
+      ### Add a legend
+      addLegend( 
+        pal = mypalette, 
+        values = ~ numtrips, 
+        opacity = 0.8,
+        title = "Trips/Departures - Members", 
+        position = "bottomright"
+      ),
+  
+    ## Add a reference data table next to the map (column 3 of the widget)
+    datatable(pop_startstation_mem, 
+              extensions="Scroller", 
+              width="100%",
+              class="compact cell-border",
+              options=list(columnDefs = list(list(visible=FALSE, targets=c(3,4)), 
+                                             list(width = "5%", targets=c(1))),
+                           deferRender=TRUE, 
+                           scrollY=300, 
+                           scroller=TRUE)
+    )
+  )
+)
+
+# Display resulting interactive widget (html format) in RStudio.
+pop_startstation_mem_map
+
+# Note: The html widget is to be exported and saved manually from the "viewer" tan in RStudio
+```
+
+#### 3.4 IM: Popularity of end stations among member riders by number of arrivals
+
+```{r End-stations-member}
+# Create a value scale showing the number of rides (departures/arrivals) of each station
+mybins_endstation_mem <- seq(0, 25320, by = 4220)
+
+# Apply the viridis colour palette to reflect the stations' popularity among riders 
+mypalette <- colorBin(
+  palette ="viridis",
+  domain = rides_v_endstation_member$numtrips,
+  na.color = "transparent", 
+  bins = mybins_endstation_mem
+)
+
+# Prepare interactive texts for each station
+mytext <- paste(
+  "Station name: ", rides_v_endstation_member$end_station_name, "<br/>",
+  "Number of trips: ", rides_v_endstation_member$numtrips, sep = "" 
+) %>%
+  lapply(htmltools::HTML)
+
+# Load desired dataframes into the interactive crosstalk environment (package: crosstalk)
+pop_endstation_mem <- SharedData$new(rides_v_endstation_member)
+
+# Create an interactive html leaflet widget to show the stations' popularity
+pop_endstation_mem_map <- bscols(
+  
+  ## Specify the columns and their widths to house each interactive elements (slider, map, ref. table)
+  widths = c(12), # one single column with max width 12
+  
+  ## Specify what would happen to the interactive elements when the size of the html window changes
+  device = c("lg"),
+  
+  ## In a crosstalk widget, elements are arranged by columns by default
+  ## To arrange element within the same column, put them in a list()
+  ## Create a list to add a slider bar on top of the interactive map and a reference table at the bottom
+  list(
+  ## Add a slider to interact with the number of trips (column 1 of the widget)
+    filter_slider("numtrips", 
+                  "Number of trips/arrivals", 
+                  pop_endstation_mem, 
+                  column=~numtrips,
+                  min = 0,
+                  step=50, 
+                  width=200
+    ),
+    
+    ## Create an interactive map (column 2 of the widget)
+    leaflet(pop_endstation_mem) %>%
+      addTiles() %>%
+      
+      ### Set coordinates over the city of Chicago
+      setView(lng = -87.6298, lat = 41.8781, zoom = 12.0 
+      ) %>%
+      
+      ### Set map style
+      addProviderTiles("Esri.WorldGrayCanvas") %>%
+      
+      ### Add circle markers to represent each station, 
+      ### fill colour to show the popularity of each station, 
+      ### and interactive tooltip
+      addCircleMarkers(
+        ~ end_lng, ~ end_lat, 
+        fillColor = ~ mypalette(numtrips), 
+        fillOpacity = 0.7, 
+        color = "white", 
+        radius = 6, 
+        stroke = FALSE,
+        label = mytext,
+        labelOptions = labelOptions(
+          style = list( 
+            "font-weight" = "normal", 
+            padding = "3px 8px"
+          ), 
+          textsize = "13px", 
+          direction = "auto"
+        ) 
+      ) %>%
+      
+      ### Add a legend
+      addLegend( 
+        pal = mypalette, 
+        values = ~ numtrips, 
+        opacity = 0.8,
+        title = "Trips/Arrivals - Members", 
+        position = "bottomright"
+      ),
+  
+    ## Add a reference data table next to the map (column 3 of the widget)
+    datatable(pop_endstation_mem, 
+              extensions="Scroller", 
+              width="100%",
+              class="compact cell-border",
+              options=list(columnDefs = list(list(visible=FALSE, targets=c(3,4)), 
+                                             list(width = "10%", targets=c(1))),
+                           deferRender=TRUE, 
+                           scrollY=300, 
+                           scroller=TRUE)
+    )
+  )
+)
+
+# Display resulting interactive widget (html format) in RStudio.
+pop_endstation_mem_map
+
+# Note: The html widget is to be exported and saved manually from the "Viewer" tan in RStudio
+```
+
+#### 3.5 IM: Popularity of start stations among casual riders by number of departures
+
+```{r Start-stations-casual}
+mybins_startstation_cas <- seq(0, 60360, by = 10060)
+
+mypalette <- colorBin(
+  palette ="viridis",
+  domain = rides_v_startstation_casual$numtrips,
+  na.color = "transparent", 
+  bins = mybins_startstation_cas
+)
+
+mytext <- paste(
+  "Station name: ", rides_v_startstation_casual$start_station_name, "<br/>",
+  "Number of trips: ", rides_v_startstation_casual$numtrips, sep = "" 
+) %>%
+  lapply(htmltools::HTML)
+
+
+pop_startstation_cas <- SharedData$new(rides_v_startstation_casual)
+
+pop_startstation_cas_map <- bscols(
+  
+  widths = c(12),
+  
+  device = c("lg"),
+  
+  list(
+    filter_slider("numtrips", 
+                  "Number of trips/departures", 
+                  pop_startstation_cas, 
+                  column=~numtrips,
+                  min = 0,
+                  step=50, 
+                  width=200
+    ),
+    
+    leaflet(pop_startstation_cas) %>%
+      addTiles() %>%
+      
+      setView(lng = -87.6298, lat = 41.8781, zoom = 12.0 
+      ) %>%
+      
+      addProviderTiles("Esri.WorldGrayCanvas") %>%
+      
+      addCircleMarkers(
+        ~ start_lng, ~ start_lat, 
+        fillColor = ~ mypalette(numtrips), 
+        fillOpacity = 0.7, 
+        color = "white", 
+        radius = 6, 
+        stroke = FALSE,
+        label = mytext,
+        labelOptions = labelOptions(
+          style = list( 
+            "font-weight" = "normal", 
+            padding = "3px 8px"
+          ), 
+          textsize = "13px", 
+          direction = "auto"
+        ) 
+      ) %>% 
+      
+      addLegend( 
+        pal = mypalette, 
+        values = ~ numtrips, 
+        opacity = 0.8,
+        title = "Trips/Departures - Casual Riders", 
+        position = "bottomright"
+      ),
+
+    datatable(pop_startstation_cas, 
+              extensions="Scroller", 
+              width="100%",
+              class="compact cell-border",
+              options=list(columnDefs = list(list(visible=FALSE, targets=c(3,4)), 
+                                             list(width = "5%", targets=c(1))),
+                           deferRender=TRUE, 
+                           scrollY=300, 
+                           scroller=TRUE)
+    )
+  )
+)
+
+pop_startstation_cas_map
+
+```
+
+#### 3.6 IM: Popularity of end stations among casual riders by number of arrivals
+
+```{r End-stations-casual}
+mybins_endstation_cas <- seq(0, 63240, by = 10540)
+
+mypalette <- colorBin(
+  palette ="viridis",
+  domain = rides_v_endstation_casual$numtrips,
+  na.color = "transparent", 
+  bins = mybins_endstation_cas
+)
+
+mytext <- paste(
+  "Station name: ", rides_v_endstation_casual$end_station_name, "<br/>",
+  "Number of trips: ", rides_v_endstation_casual$numtrips, sep = "" 
+) %>%
+  lapply(htmltools::HTML)
+
+pop_endstation_cas <- SharedData$new(rides_v_endstation_casual)
+
+pop_endstation_cas_map <- bscols(
+  
+  widths = c(12),
+  
+  device = c("lg"),
+  
+  list(
+    filter_slider("numtrips", 
+                  "Number of trips/arrivals", 
+                  pop_endstation_cas, 
+                  column=~numtrips,
+                  min = 0,
+                  step=50, 
+                  width=200
+    ),
+    
+    leaflet(pop_endstation_cas) %>%
+      addTiles() %>%
+      
+      setView(lng = -87.6298, lat = 41.8781, zoom = 12.0 
+      ) %>%
+      
+      addProviderTiles("Esri.WorldGrayCanvas") %>%
+      
+      addCircleMarkers(
+        ~ end_lng, ~ end_lat, 
+        fillColor = ~ mypalette(numtrips), 
+        fillOpacity = 0.7, 
+        color = "white", 
+        radius = 6, 
+        stroke = FALSE,
+        label = mytext,
+        labelOptions = labelOptions(
+          style = list( 
+            "font-weight" = "normal", 
+            padding = "3px 8px"
+          ), 
+          textsize = "13px", 
+          direction = "auto"
+        ) 
+      ) %>% 
+      
+      addLegend( 
+        pal = mypalette, 
+        values = ~ numtrips, 
+        opacity = 0.8,
+        title = "Trips/Arrivals - Casual Riders", 
+        position = "bottomright"
+      ),
+
+    datatable(pop_endstation_cas, 
+              extensions="Scroller", 
+              width="100%",
+              class="compact cell-border",
+              options=list(columnDefs = list(list(visible=FALSE, targets=c(3,4)), 
+                                             list(width = "10%", targets=c(1))),
+                           deferRender=TRUE, 
+                           scrollY=300, 
+                           scroller=TRUE)
+    )
+  )
+)
+
+pop_endstation_cas_map
+
+```

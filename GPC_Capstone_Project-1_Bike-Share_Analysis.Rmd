@@ -1,0 +1,618 @@
+---
+title: "Bike Share Case Study - Data Transformation"
+author: "Phuc Le"
+date: "2022-11-14"
+output:
+  html_document: 
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/')
+```
+
+## Document Description
+
+This document is part of the final documentation for The Bike Share Case Study. Here, steps to transform the cleaned ridership dataset are detailed. These include a description of the methodology and a display of written codes for the analyses with respective elaborations/remarks.
+
+## Summary of Input and Output Data
+
+For this Case Study, the [Ridership Record](https://divvy-tripdata.s3.amazonaws.com/index.html) from 08.01.2021 to 07.31.2022 of the fictional bike-sharing company Cyclistics is utilized. This data is made publicly available by Motivate International Inc. under this [Licencse](https://ride.divvybikes.com/data-license-agreement).
+
+The input of this data-transformation process is the ridership dataset that has been combined, cleaned, and saved in the previous data-cleaning process.
+
+The output of this data-transformation process are R datatframes containing information to answer specific aspects of the originally given question ("How do annual members & casual riders use Cyclistic bikes differently?"). These data tables are then saved as csv. files and used in the subsequent visualization and analyses.
+
+## Methodology
+
+The transformation and subsequent visualization of the ridership data are carried out to answer the Case Study's the core question:
+
+*How do annual members & casual riders use Cyclistics bikes differently?*
+
+This initially abstract core question can be addressed from different aspects of the Cyclistics as a ride-share service. In other words, an answer to the core question roughly has the following format:
+
+*In terms of A, member riders have/do X, while casual riders have/do Y.*
+
+where A is the considered aspect, and X/Y is the riders' characteristics/behaviors as observed from the transformed, analyzed, and visualized data.
+
+With Cyclistics being a ride-share service, and that people use Cyclistics' bikes for traveling from and places, the aspects considered in answering the core question are:
+
+1.  Usage Intensity (i.e., ridership/usage of Cyclistics)
+2.  Location
+3.  Time
+
+In turn, the riders' characteristics/behavior within each aspect is examined under different criteria. Overall, the data-transformation process is carried out using R and follows the mind-map below:
+
+![Aspects of potential difference in the usage of Cyclistics bikes between member and casual riders](Things-to-analyze_short.jpg) Since the core question concerns the difference between rider types, the transformed data is grouped accordingly for eventual comparison.
+
+## Terminology
+
+In completing this case study/assignment, the following terms are often used:
+
+-   Rides (or trips): a single, recorded use of Cyclistics' bike for traveling
+
+-   Ridership: the number of rides
+
+-   Ridership Type: the type of the rider (casual or member) who completed a ride
+
+## Data-transformation Process in R
+
+### 1. Preparing R for data transformation
+
+#### 1.1 Install and load necessary R packages
+
+```{r Install and load packages, results='hide', message=FALSE, warning=FALSE}
+# Install tidyverse to get packages for everyday data analyses
+install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+
+# Install skimr to provide summary statistics about variables in data frames, tibbles, data tables and vectors
+install.packages("skimr", repos = "http://cran.us.r-project.org")
+
+# Install janitor for Examining and Cleaning Dirty Data (when needed)
+install.packages("janitor", repos = "http://cran.us.r-project.org")
+
+# Install geosphere for functions that compute various aspects of distance, direction, area, etc. for geographic (geodetic) coordinates (when needed)
+install.packages("geosphere", repos = "http://cran.us.r-project.org")
+
+# Load packages
+library(tidyverse)
+library(data.table)
+library(lubridate)
+library(ggplot2)
+library(skimr)
+library(janitor)
+library(dplyr)
+library(geosphere)
+library(ggpubr) # Added functions to ggplot2
+```
+
+#### 1.2. Change and view working directory
+
+```{r Change working directory, results= FALSE}
+getwd() #view path of current (initial) working directory
+
+setwd("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone")
+
+getwd() #view and confirm path of working directory
+```
+
+#### 1.3. [Optional] View the content of the working directory
+
+```{r List content of directory}
+list.dirs() 
+```
+
+### 2. Import cleaned ridership data as dataframes
+
+```{r Load cleaned dataset as dataframe, results= FALSE}
+rides_cleaned <- fread("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/rides_masterdf_cleaned_221030.csv")
+
+glimpse(rides_cleaned)
+```
+
+### 3. Calculations/ data manipulations in preparation for data transformation
+
+This is a continuation of the preliminary calculations/ data manipulation steps done during data-cleaning (step 9).
+
+#### 3.1 Break down date and time data further into potentially useful elements
+
+Here, only the starting date and time of each ride (started_at column) is broken down, as it is relevant to subsequent transformation/analysis.
+
+```{r Break down time elements, results= FALSE}
+# Add a column with just the Year of the starting time (started_at column) 
+rides_cleaned$started_at_year <- format(rides_cleaned$started_at, "%Y")
+
+# Add a column with just the Month of the starting time (started_at column) 
+rides_cleaned$started_at_month <- format(rides_cleaned$started_at, "%m")
+
+# Add a column that displays the Week (number) of the starting time (started_at column)  
+rides_cleaned$started_at_week <- format(rides_cleaned$started_at,"%W")
+
+# Add a column with just Date Number of the starting time (started_at column) 
+rides_cleaned$started_at_day <- format(rides_cleaned$started_at, "%d")
+
+# Add a column that displays the Day of the Week of the starting time (started_at column)  
+rides_cleaned$started_at_weekday <- format(rides_cleaned$started_at, "%A")
+
+# Add a column with the Date of the starting time (started_at column) in YYYY-MM-DD format  
+rides_cleaned$started_at_YMD <- format(rides_cleaned$started_at, "%Y-%m-%d")
+
+# Add a column with the Date of the starting time (started_at column) in POSIX YYYY-MM-DD
+rides_cleaned$started_at_YMD_POSIX <- as.POSIXct(rides_cleaned$started_at_YMD, 
+                                                 format = "%Y-%m-%d"
+                                                 )
+
+# Add a column with the starting time (started_at column) in HH:MM:SS format (no date)
+rides_cleaned$started_at_ToD <- format(rides_cleaned$started_at, "%H:%M:%S")
+
+# Add a column with the starting time (started_at column) in POSIX HH:MM:SS format (no date)
+rides_cleaned$started_at_ToD_POSIX <- as.POSIXct(rides_cleaned$started_at_ToD, format = "%H:%M:%S")
+
+## Group the time variable by hours in rides_cleaned
+rides_cleaned$started_at_ToD_byHr <- cut(
+  rides_cleaned$started_at_ToD_POSIX, 
+  breaks = "60 mins"
+)
+
+glimpse(rides_cleaned)
+```
+
+### 4. Data transformation: Intensity of Usage
+
+#### 4.1. Create a dataframe of Cyclistics' ridership by ridership types
+
+This dataframe shows the number of rides made by casual riders and that made by member riders using Cyclistic bikes from August 01, 2021 to July 31, 2022.
+
+```{r Intensity of usage 1, results= FALSE}
+rides_v_riderships <- rides_cleaned %>%
+  
+  select(
+    member_casual 
+  ) %>%
+  
+  group_by(member_casual) %>%
+  
+  mutate(numtrips = n()) %>%
+  
+  distinct(member_casual, .keep_all = TRUE)
+  
+  rides_v_riderships <-rides_v_riderships[order(rides_v_riderships$numtrips,
+                                                decreasing = TRUE)
+                                          ] %>% # sort by the number of trips (numtrips)
+    # The remaining 2 arguments are to create columns containing the corresponding percentage of each membership type (prop), and the physical position of each of these value if displayed on a potential pie chart (ypos)
+    mutate(prop = numtrips / sum(rides_v_riderships$numtrips) *100) %>%
+    mutate(ypos = cumsum(prop)- 0.5*prop )
+    
+  
+glimpse(rides_v_riderships)
+```
+
+#### 4.2. Create a dataframe of Cyclistics' ridership by ridership types and bike types
+
+This dataframe shows the number of rides made by casual riders and that made by member riders using different Cyclistics bike types from August 01, 2021 to July 31, 2022.
+
+```{r Intensity of usage 2, results= FALSE}
+# create new dataframes from rides_cleaned with just rides and rideable_type
+## grouped by memeber type and rideable_type
+rides_v_type <- rides_cleaned %>%
+  select(
+    member_casual, 
+    rideable_type
+  ) %>%
+  
+  group_by(member_casual, rideable_type) %>%
+  
+  mutate(numtrips = n()) %>%
+  
+  distinct(rideable_type, member_casual, .keep_all = TRUE)
+
+glimpse(rides_v_type)
+
+## Create a rides_v_type dataframe for member riders only 
+rides_v_type_member <- rides_v_type %>%
+  filter(member_casual == "member")
+
+glimpse(rides_v_type_member)
+
+## Create a rides_v_type dataframe for casual riders only
+rides_v_type_casual <- rides_v_type %>%
+  filter(member_casual == "casual")
+
+glimpse(rides_v_type_casual)
+```
+
+#### 4.3. Create dataframes of Cyclistics' ridership by ridership types and various time intervals
+
+The idea to analyze and transform data in this direction and its execution is adapted from the previous work of [Isabella Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html).
+
+##### 4.3.1. Create a dataframe of Cyclistics' ridership by ridership types and month
+
+```{r Intensity of usage 3 part 1, results= FALSE}
+  rides_v_month <- rides_cleaned %>%
+    
+    select(
+      member_casual, 
+      started_at,
+      started_at_year, 
+      started_at_month, 
+      started_at_week, 
+      started_at_day, 
+      started_at_weekday, 
+      started_at_YMD,
+      started_at_YMD_POSIX,
+      started_at_ToD,
+      started_at_ToD_POSIX,
+      started_at_ToD_byHr,
+      ended_at,
+      ride_duration
+    ) %>%
+    
+    group_by(member_casual, started_at_month) %>%
+    
+    mutate(numtrips = n()) %>%
+    
+    distinct(started_at_month, member_casual, .keep_all = TRUE)
+  
+  glimpse(rides_v_month)
+  
+  ## Create a rides_v_month dataframe for member riders only 
+  rides_v_month_member <- rides_v_month %>%
+    filter(member_casual == "member")
+  
+  glimpse(rides_v_month_member)
+  
+  ## Create a rides_v_month dataframe for casual riders only
+  rides_v_month_casual <- rides_v_month %>%
+    filter(member_casual == "casual")
+  
+  glimpse(rides_v_month_casual)
+```
+
+##### 4.3.2. Create dataframes of Cyclistics' ridership by ridership types and ride dates in YYYY-MM-DD format.
+
+```{r Intensity of usage 3 part 2, results= FALSE}
+rides_v_YMD <- rides_cleaned %>%
+  
+  select(
+    member_casual, 
+    started_at,
+    started_at_year, 
+    started_at_month, 
+    started_at_week, 
+    started_at_day, 
+    started_at_weekday, 
+    started_at_YMD,
+    started_at_YMD_POSIX,
+    started_at_ToD,
+    started_at_ToD_POSIX,
+    started_at_ToD_byHr,
+    ended_at,
+    ride_duration
+  ) %>%
+  
+  group_by(member_casual, started_at_YMD) %>%
+  
+  mutate(numtrips = n()) %>%
+  
+  distinct(started_at_YMD, member_casual, .keep_all = TRUE)
+
+glimpse(rides_v_YMD)
+
+## Create a rides_v_YMD dataframe for member riders only 
+rides_v_YMD_member <- rides_v_YMD %>%
+  filter(member_casual == "member")
+
+glimpse(rides_v_YMD_member)
+
+## Create a rides_v_YMD dataframe for casual riders only
+rides_v_YMD_casual <- rides_v_YMD %>%
+  filter(member_casual == "casual")
+
+glimpse(rides_v_YMD_casual)
+
+```
+
+##### 4.3.3. Create dataframes of Cyclistics' ridership by ridership types and time (hour) of day.
+
+```{r Intensity of usage 3 part 3, results= FALSE}
+# create new dataframes from rides_cleaned with just rides and time info 
+## grouped by memeber type and started_at_ToD
+rides_v_hr <- rides_cleaned %>%
+  
+  select(
+    member_casual, 
+    started_at,
+    started_at_year, 
+    started_at_month, 
+    started_at_week, 
+    started_at_day, 
+    started_at_weekday, 
+    started_at_YMD,
+    started_at_YMD_POSIX,
+    started_at_ToD,
+    started_at_ToD_POSIX,
+    started_at_ToD_byHr,
+    ended_at,
+    ride_duration
+  ) %>%
+  
+  group_by(member_casual, started_at_ToD_byHr) %>%
+  
+  mutate(numtrips = n()) %>%
+  
+  distinct(started_at_ToD_byHr, member_casual, .keep_all = TRUE)
+
+glimpse(rides_v_hr)
+
+## Create a rides_v_hr dataframe for member riders only 
+rides_v_hr_member <- rides_v_hr %>%
+  filter(member_casual == "member")
+
+glimpse(rides_v_hr_member)
+
+## Create a rides_v_hr dataframe for casual riders only
+rides_v_hr_casual <- rides_v_hr %>%
+  filter(member_casual == "casual")
+
+glimpse(rides_v_hr_casual)
+```
+
+#### 4.4. Create a dataframe of Cyclistics' ridership by ridership types and ride dates, under the respective weather conditions
+
+The idea to analyze and transform data in this direction and its execution is adapted from the previous work of [Isabella Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html).
+
+```{r Intensity of usage 4, results= FALSE}
+# Load raw weather data
+## Data ordered free of charge from https://www.ncdc.noaa.gov/cdo-web/datatools/records.
+raw_weather <- fread("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Weather-Data/Weather_ZIP60666_210731-220831.csv")
+glimpse(raw_weather)
+
+# Re-format date column (in a new column) to dttm and chr. Note that the original DATE column is already of type "Date"
+raw_weather <- raw_weather %>%
+  mutate(date_POSIX = as.POSIXct(DATE, format = "%Y-%m-%d")) %>%  #The new column has type dttm
+  mutate(date_chr = as.character(DATE))
+glimpse(raw_weather)
+
+# Quick data-cleaning: Reorganize data in dataframe raw_weather
+weather_tavg_prcp_wnd <- raw_weather %>% 
+  select(
+    DATE,
+    date_chr,
+    date_POSIX,
+    TAVG,
+    PRCP,
+    AWND,
+  )
+
+# Change column names in data frame raw_weather. Note that the new column names for DATE and date_chr is made deliberately the same as in dataframe rides_v_YMD. This simplify subsequent inner join operation
+colnames(weather_tavg_prcp_wnd)<- c("started_at_YMD_date", "started_at_YMD", "started_at_YMD_POSIX", "avg_temp", "precipitation", "wind_speed") 
+
+# View the cleaned weather dataframe
+glimpse(weather_tavg_prcp_wnd)
+
+# Inner join rides_v_YMD with weather_tavg_prcp_wnd.
+rides_v_weather <- merge(x=rides_v_YMD,y=weather_tavg_prcp_wnd,by="started_at_YMD") #join by dates as chr. Join by date as dttm does NOT work for some reasons
+glimpse(rides_v_weather)
+```
+
+### 5. Data transformation: Locations
+
+#### 5.1 Create dataframes of Cyclistics' ridership by ridership types and start stations
+
+The idea to analyze and transform data in this direction and its execution is adapted from the previous work of [Isabella Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html).
+
+```{r Location 1, results= FALSE}
+rides_v_startstation_all <- rides_cleaned %>%
+  select(
+    start_station_name, 
+    start_lat, 
+    start_lng
+  ) %>%
+  
+  group_by(start_station_name) %>%
+  
+  mutate(numtrips = n()) %>%
+  
+  distinct(start_station_name,  .keep_all = TRUE)
+
+## Sort busiest start station
+rides_v_startstation_all <-rides_v_startstation_all[order(rides_v_startstation_all$numtrips, decreasing = TRUE),] 
+glimpse(rides_v_startstation_all)
+
+## group ridership by ridership types and start stations
+rides_v_startstation <- rides_cleaned %>%
+  select(
+    member_casual,
+    start_station_name, 
+    start_lat, 
+    start_lng
+  ) %>%
+  
+  group_by(member_casual, start_station_name) %>%
+  
+  mutate(numtrips = n()) %>%
+  
+  distinct(member_casual, start_station_name,  .keep_all = TRUE)
+
+glimpse(rides_v_startstation)
+
+# Create a rides_v_startstation dataframe for member riders only 
+rides_v_startstation_member <- rides_v_startstation %>%
+  filter(member_casual == "member")
+
+## Sort busiest start station for member riders
+rides_v_startstation_member <-rides_v_startstation_member[order(rides_v_startstation_member$numtrips, decreasing = TRUE),] 
+glimpse(rides_v_startstation_member)
+
+# Create a rides_v_startstation dataframe for casual riders only
+rides_v_startstation_casual <- rides_v_startstation %>%
+  filter(member_casual == "casual")
+
+## Sort busiest start station for casual riders
+rides_v_startstation_casual <-rides_v_startstation_casual[order(rides_v_startstation_casual$numtrips, decreasing = TRUE),] 
+glimpse(rides_v_startstation_casual)
+```
+
+#### 5.2. Create dataframes of Cyclistics' ridership by ridership types and end stations
+
+```{r Location 2, results= FALSE}
+rides_v_endstation_all <- rides_cleaned %>%
+  select(
+    end_station_name, 
+    end_lat, 
+    end_lng
+  ) %>%
+  
+  group_by(end_station_name) %>%
+  
+  mutate(numtrips = n()) %>%
+  
+  distinct(end_station_name,  .keep_all = TRUE)
+
+## Sort busiest end station
+rides_v_endstation_all <-rides_v_endstation_all[order(rides_v_endstation_all$numtrips, decreasing = TRUE),] 
+glimpse(rides_v_endstation_all)
+
+## group ridership by ridership types and end stations
+rides_v_endstation <- rides_cleaned %>%
+  select(
+    member_casual,
+    end_station_name, 
+    end_lat, 
+    end_lng
+  ) %>%
+  
+  group_by(member_casual, end_station_name) %>%
+  
+  mutate(numtrips = n()) %>%
+  
+  distinct(member_casual, end_station_name,  .keep_all = TRUE)
+
+glimpse(rides_v_endstation)
+
+# Create a rides_v_endstation dataframe for member riders only 
+rides_v_endstation_member <- rides_v_endstation %>%
+  filter(member_casual == "member")
+
+## Sort busiest end station for member riders
+rides_v_endstation_member <-rides_v_endstation_member[order(rides_v_endstation_member$numtrips, decreasing = TRUE),] 
+glimpse(rides_v_endstation_member)
+
+# Create a rides_v_endstation dataframe for casual riders only
+rides_v_endstation_casual <- rides_v_endstation %>%
+  filter(member_casual == "casual")
+
+## Sort busiest end station for causal riders
+rides_v_endstation_casual <-rides_v_endstation_casual[order(rides_v_endstation_casual$numtrips, decreasing = TRUE),] 
+glimpse(rides_v_endstation_casual)
+```
+
+### 6. Data transformation: Time
+
+#### 6.1. Create a dataframe of Cyclistics' ridership including ride duration and ride distance (no groupings)
+
+```{r Time 1, results= FALSE}
+# create new dataframes from rides_cleaned with rides, ride distance, duration, among others (note: ride_duration in seconds)
+rides_duration_distance <- rides_cleaned %>%
+  select(
+    member_casual, 
+    started_at,
+    started_at_year, 
+    started_at_month, 
+    started_at_week, 
+    started_at_day, 
+    started_at_weekday, 
+    started_at_YMD,
+    started_at_YMD_POSIX,
+    started_at_ToD,
+    started_at_ToD_POSIX,
+    started_at_ToD_byHr,
+    ended_at,
+    ride_duration,
+    ride_distance
+  )
+```
+
+#### 6.2. Create dataframes showing summaries of ride duration and distance by ridership types and various time intervals
+
+```{r Time 2, results= FALSE}
+# mean duration (sec) and mean distance (m) per month by ridership type
+rides_duration_distance_perMonth <- rides_duration_distance%>%
+  group_by(member_casual, started_at_month) %>%
+  summarise_at(.var = c("ride_duration", "ride_distance"),
+               .funs = c(mean="mean", Sd="sd"))
+
+# mean duration and mean distance per weekday by ridership type
+rides_duration_distance_perWeekday <- rides_duration_distance%>%
+  group_by(member_casual, started_at_weekday) %>%
+  summarise_at(.var = c("ride_duration", "ride_distance"),
+               .funs = c(mean="mean", Sd="sd"))
+
+# mean duration and mean distance by hour by ridership type
+rides_duration_distance_byHr <- rides_duration_distance%>%
+  group_by(member_casual, started_at_ToD_byHr) %>%
+  summarise_at(.var = c("ride_duration", "ride_distance"),
+               .funs = c(mean="mean", Sd="sd"))  
+
+# Check for round trip
+rides_roundtrips <- rides_duration_distance %>%
+  filter(ride_distance == 0 && ride_duration > 0)
+
+glimpse(rides_roundtrips) #no round trips found
+```
+
+*Note: Though belonging to the "Location" aspect in answering the core question, the transformation of ridership data in relation to ride distances is performed alongside with that in relation to ride duration in this step due to similarities in the coding and outputs.*
+
+### 7. Save the resulting dataframes of transformed data
+
+With the data transformation process producing many useful dataframes that need to be saved, a "for" loop is used rather than individual fwrite's.
+
+```{r Save dataframes, results= FALSE}
+df_names <- c("rides_cleaned",
+              
+              "rides_v_riderships",
+              
+              "rides_v_YMD",
+              "rides_v_YMD_casual",
+              "rides_v_YMD_member",
+              
+              "rides_v_hr",
+              "rides_v_hr_casual",
+              "rides_v_hr_member",
+              
+              "rides_v_month",
+              "rides_v_month_casual",
+              "rides_v_month_member",
+              
+              "rides_v_type",
+              "rides_v_type_casual",
+              "rides_v_type_member",
+              
+              "rides_v_weather",
+              
+              "rides_v_startstation",
+              "rides_v_startstation_all",
+              "rides_v_startstation_casual",
+              "rides_v_startstation_member",
+              
+              "rides_v_endstation",
+              "rides_v_endstation_all",
+              "rides_v_endstation_casual",
+              "rides_v_endstation_member",
+              
+              "rides_duration_distance",
+              "rides_duration_distance_perMonth",
+              "rides_duration_distance_byHr",
+              "rides_duration_distance_perWeekday"
+              ) 
+
+for(i in 1:length(df_names)) {                          # Head of for-loop
+  fwrite(get(df_names[i]),                              # Write CSV files to folder
+             paste0("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/",
+                    df_names[i],
+                    ".csv"),
+         col.names = TRUE,    
+         row.names = FALSE)
+}
+```

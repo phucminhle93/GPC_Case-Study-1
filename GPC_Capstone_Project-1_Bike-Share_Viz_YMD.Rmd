@@ -1,0 +1,1105 @@
+---
+title: "Bike Share Case Study - Data Visualization - Part 2"
+author: "Phuc Le"
+date: "2022-11-16"
+output:
+  html_document: 
+    toc: TRUE
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+    fig.path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots"
+)
+```
+
+## Document Description
+
+In this document, the creation of various plots to visualize Cyclistics'
+ridership data is detailed. This is the second and final part in the
+two-part data-visualization process.
+
+## Summary of Process Input and Output
+
+As mentioned in part 1, the inputs of the overall data-visualization
+process are the ridership data tables produced and saved in the previous
+data-transformation process. The outputs are visualizations of this data
+set in the forms of various plots, charts, and maps. Subsequent analyses
+and answering of the Case Study's core question ("How do annual members
+& casual riders use Cyclistic bikes differently?") are based on the
+insights provided by these visualizations.
+
+## Methodology
+
+The visualization of Cyclistics' ridership data are carried out to help
+answer the Case Study's core question:
+
+*How do annual members & casual riders use Cyclistics bikes
+differently?*
+
+To help answer this core question, a total of 14 visualizations was
+created using R, as listed in Table 1 of part 1 (see Bike Share Case
+Study - Data Visualization - Part 1). This document details the creation
+of the visualizations 1-6, 13, and 14, which are non-interactive plots
+created with ggplot.
+
+## Data-transformation Process in R
+
+**Important Note:**
+
+Knitting of this particular Markdown document may fail if the file path
+is too long. As an interim solution:
+
+1.  Save this Markdown document in a destination with a shorter path and
+    set the working directory (section 1.2) accordingly.
+
+2.  Set "Knit directory" to "Current working directory" (which has the
+    shorter path
+
+3.  Add the following line to the "r setup" code chunk in the markdown
+    file:
+
+    *knitr::opts_chunk\$set(fig.path = "\<directory to save the plots\>"
+    )*
+
+Once knitting is completed, the Markdown file and the resulting html can
+be copied back to the original working directory\*
+
+### 1. Preparing R for data transformation
+
+#### 1.1 Install and load necessary R packages
+
+```{r Install-and-load-packages, results='hide', message=FALSE, warning=FALSE}
+# Install tidyverse to get packages for everyday data analyses
+install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+
+# Install skimr to provide summary statistics about variables in data frames, tibbles, data tables and vectors
+install.packages("skimr", repos = "http://cran.us.r-project.org")
+
+# Install janitor for Examining and Cleaning Dirty Data (when needed)
+install.packages("janitor", repos = "http://cran.us.r-project.org")
+
+# Install geosphere for functions that compute various aspects of distance, direction, area, etc. for geographic (geodetic) coordinates (when needed)
+install.packages("geosphere", repos = "http://cran.us.r-project.org")
+
+# Install viridis to get various color palettes for used visualizations
+install.packages("viridis", repos = "http://cran.us.r-project.org")
+
+# Install leaflet for the creation of interactive maps
+install.packages("leaflet", repos = "http://cran.us.r-project.org")
+
+# Load packages
+library(tidyverse)
+library(data.table)
+library(lubridate)
+library(ggplot2)
+library(skimr)
+library(janitor)
+library(dplyr)
+library(geosphere)
+library(viridis) # color palettes
+library(ggpubr) # added functions to ggplot2
+library(leaflet) # for geographical map
+library(crosstalk) # for sliders on geographical map
+library(DT) #for visualized data tables 
+library(htmlwidgets) # for widgets on maps
+library(htmltools) #tools for creating, manipulating, and writing HTML from R
+```
+
+#### 1.2. Change and view working directory
+
+```{r Change-working-directory, results= FALSE}
+getwd() #view path of current (initial) working directory
+
+setwd("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone")
+#in this case, the path is short enough for knitting
+
+getwd() #view and confirm path of working directory
+```
+
+#### 1.3. [Optional] View the content of the working directory
+
+```{r List content of directory}
+list.dirs() 
+```
+
+### 2. Import cleaned ridership data as dataframes
+
+```{r Load-transformed-dataset-as-dataframes, results= FALSE}
+# Load all dataframes from analysis
+# Use fread instead of read.csv to achieve the same outcome faster
+df_names <- df_names <- c("rides_cleaned",
+                          
+                          "rides_v_riderships",
+                          
+                          "rides_v_YMD",
+                          "rides_v_YMD_casual",
+                          "rides_v_YMD_member",
+                          
+                          "rides_v_hr",
+                          "rides_v_hr_casual",
+                          "rides_v_hr_member",
+                          
+                          "rides_v_month",
+                          "rides_v_month_casual",
+                          "rides_v_month_member",
+                          
+                          "rides_v_type",
+                          "rides_v_type_casual",
+                          "rides_v_type_member",
+                          
+                          "rides_v_weather",
+                          
+                          "rides_v_startstation",
+                          "rides_v_startstation_all",
+                          "rides_v_startstation_casual",
+                          "rides_v_startstation_member",
+                          
+                          "rides_v_endstation",
+                          "rides_v_endstation_all",
+                          "rides_v_endstation_casual",
+                          "rides_v_endstation_member",
+                          
+                          "rides_duration_distance",
+                          "rides_duration_distance_perMonth",
+                          "rides_duration_distance_byHr",
+                          "rides_duration_distance_perWeekday"
+                          )
+
+for(i in 1:length(df_names)){
+  assign(df_names[i], 
+         fread(paste0("C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/",
+                         df_names[i],
+                         ".csv")))}
+```
+
+### 3. Data-visualization: Intensity of Usage
+
+#### 3.1. Visualization 1: Overall ridership
+
+Create a pie chart showing the proportion of rides made by member and
+casual riders among the total ridership from 08.01.2021 to 07.31.2022.
+
+```{r viz-1}
+# Create the pie chart using ggplot()
+rides_v_riderships_pie <- ggplot(rides_v_riderships, aes(x="", y=prop, fill=member_casual)) +
+  
+  ## In ggplot, a pie chart is considered a circular stacked bar chart with a single bar
+  ## Build a stacked bar chart with one bar only using the geom_bar() function
+  ## Set stat = "identity" since the in dataframe rides_v_riderships, riderships are values in cells rather than the count of cells. If dataframes rides_cleaned is used, then identity = "count"
+  geom_bar(stat="identity", width=1, color="white") +
+  
+  ## Make this bar chart circular with coord_polar()
+  coord_polar("y", start=0) +
+  
+  ## Remove background, grid, numeric labels
+  theme_void() + 
+  
+  ## Set legend position to the right of the pie chart
+  theme(legend.position="right") +
+  
+  ## Add labels to each portion (member/casual riders) of the bar chart
+  ## Ridership values in the labels to be rounded to 2 decimal places for tidiness
+  geom_text(aes(label = paste0(format(round(prop, 2), nsmall = 2), " %"
+                               )
+                ), 
+            
+            ### Set position of the label to the center of each portion
+            position = position_stack(vjust = 0.5),
+            
+            ### Set labels to different colors to stand out from the fill
+            color = c("black", "white"), size=4) +
+  
+  ## Apply viridis color palette to each portion of the pie chart
+  ## Name the respective portion in the legend
+  scale_fill_viridis_d(option = "viridis", labels = c("Casual Rider", "Member Rider"))+
+  
+  ## Specify the title of the legend
+  labs(fill = "Ridership Type")+
+  
+  ## Specify the title of the pie chart, which include the formatted total ridership value ("Total no. of trips")
+  labs(title = paste0("Ridership \n 08.01.2021 - 07.31.2022 \n",
+                      "Total no. of trips: ",
+                      formatC(sum(rides_v_riderships$numtrips), format="d", big.mark=",")
+                      )
+       )
+```
+
+Display the resulting chart
+
+```{r, echo=FALSE}
+plot(rides_v_riderships_pie)
+```
+
+#### 3.2. Visualization 2: Ridership per bike type
+
+Create a stacked bar chart showing the proportion of bike types used by
+member and casual riders from 08.01.2021 to 07.31.2022.
+
+```{r viz-2}
+# Create the stacked bar chart using ggplot()
+rides_v_type_bar <- ggplot(data=rides_v_type, 
+                           aes(x=member_casual, 
+                               y=numtrips/1000, # ridership is in unit "thousand trips/rides"
+                               fill=rideable_type)) +
+  
+  ## Set bar chart to show respective riderships as values in cells (see similar comment in code for visualization 1)
+  geom_bar(stat="identity")+
+  
+  ## Specify the title of the chart
+  labs(title = "Ridership per Bike Type \n 08.01.2021 - 07.31.2022")+
+  
+  ## Specify x-axis label
+  xlab("Ridership Type") + 
+  
+  ## Specify y-axis label
+  ylab("Number of Trips (thousand)")+
+  
+  ## Set light theme, i.e., white instead of gray plot background
+  theme_light() +
+  
+  ## Set the title of the legends
+  labs(fill = "Bike Type")+
+  
+  ## Apply viridis color palette portions in the chart
+  ## Name the respective portion in the legend
+  scale_fill_viridis_d(option = "viridis", 
+                       labels = c("Classic Bike", "Docked Bike", "Electric Bike")
+                       )
+
+```
+
+Display the resulting chart
+
+```{r, echo=FALSE}
+plot(rides_v_type_bar)
+```
+
+#### 3.3. Visualization 3: Monthly Ridership
+
+Create a side-by-side bar chart showing the monthly ridership from
+08.01.2021 to 07.31.2022 by ridership types.
+
+```{r viz-3}
+# Create the side-by-side bar chart using ggplot()
+rides_v_month_bar <- ggplot(data=rides_v_month, 
+                            aes(x=started_at_month, 
+                                y=numtrips/1000, # ridership is in unit "thousand trips/rides"
+                                fill=member_casual)) +
+  
+  ## In geom_bar, set position = position_dodge() to specify side-by-side bars in the chart
+  ## If position is not specified, the default is a stacked bar chart
+  geom_bar(stat="identity", position=position_dodge())+
+  
+  ## Specify the title of the chart
+  labs(title = "Monthly Ridership \n 08.01.2021 - 07.31.2022")+
+  
+  ## Set x-axis to display month name instead of number, and in the order Jan-Dec
+  scale_x_continuous(
+    expand = c(0, 0),
+    breaks = seq(1, 12, length = 12),
+    labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))+
+  
+  ## Specify x-axis label
+  xlab("Month") + 
+  
+  ## Specify x-axis label
+  ylab("Number of Trips (thousand)")+
+  
+  ## Set light theme, i.e., white instead of gray plot background
+  theme_light() +
+  
+  ## Apply viridis color palette portions in the chart
+  ## Name the respective portion in the legend  
+  scale_fill_viridis_d(labels = c("Casual Rider", "Member Rider")) + 
+  
+  ## Set the title of the legends
+  labs(fill = "Ridership Type")
+```
+
+Display the resulting chart
+
+```{r, echo=FALSE}
+plot(rides_v_month_bar)
+```
+
+#### 3.4. Visualization 4: Weekly ridership by weekday
+
+Create heat maps showing the weekly ridership from 08.01.2021 to
+07.31.2022 by ridership types, which also show possible seasonal
+pattern(s) of Cyclistics' usage. Each member type has a separate heat
+map (2 maps created in total).
+
+The idea to analyze, transform and visualize data in this direction as
+well as its execution is adapted and improved from the previous work of
+[Isabella
+Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html).
+
+```{r viz-4}
+# Create a heat map to show most popular time of year for member riders 
+rides_v_YMD_mem_heat <- ggplot(
+  rides_v_YMD_member,
+  aes(
+    x = started_at_week, 
+    
+    ### Arrange the weekday from Mon-Sun on y-axis
+    y = factor(rides_v_YMD_member$started_at_weekday, 
+               levels = c("Monday", "Tuesday", "Wednesday", 
+                          "Thursday", "Friday", "Saturday", "Sunday"
+                          )
+               ), 
+    fill = numtrips
+    )
+  ) + 
+  
+  ## Use the viridis colour palette to represent the ridership of each day
+  scale_fill_viridis(
+    option = "D",
+    direction = 1,
+    name = "Number of Trips"
+  ) +
+  
+  ## Create a rectangular heat map
+  geom_tile(
+    colour = "white", 
+    na.rm = FALSE
+  ) + 
+  
+  ## Separate the heat maps by year
+  facet_wrap(
+    "started_at_year", 
+    ncol = 1
+  ) + 
+  
+  ## Reverse the y-axis so that the weekdays read vertically Monday to Sunday 
+  scale_y_discrete(
+    limits = rev
+  ) +
+  
+  ## Add x-axis labels to show the months of the year
+  scale_x_continuous(
+    expand = c(0, 0),
+    breaks = seq(1, 52, length = 12),
+    labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+  ) +
+  
+  ## Set the light theme 
+  theme_light() +
+  
+  ## Remove any unnecessary labels 
+  theme(
+    axis.title = element_blank()
+  ) +
+  
+  ## Add a title 
+  labs(title = "Daily Ridership by Member Riders \n 08.01.2021 - 07.31.2022")
+
+# Create a heat map to show most popular time of year for casual riders  
+rides_v_YMD_cas_heat <- ggplot(
+  rides_v_YMD_casual,
+  aes(
+    x = started_at_week, 
+    
+    ### Arrange the weekday from Mon-Sun on y-axis
+    y = factor(rides_v_YMD_member$started_at_weekday, 
+               levels = c("Monday", "Tuesday", "Wednesday", 
+                          "Thursday", "Friday", "Saturday", "Sunday"
+                          )
+               ),
+    fill = numtrips
+    )
+  ) + 
+  
+  # Use the viridis colour scheme to show the popularity of each day
+  scale_fill_viridis(
+    option = "D",
+    direction = 1,
+    name = "Number of Trips",
+  ) +
+  
+  # Create a rectangular heat map
+  geom_tile(
+    colour = "white", 
+    na.rm = FALSE
+  ) + 
+  
+  # Separate the heat maps by year
+  facet_wrap(
+    "started_at_year", 
+    ncol = 1
+  ) + 
+  
+  # Reverse the y-axis so that the weekdays read vertically Monday to Sunday 
+  scale_y_discrete(
+    limits = rev
+  ) +
+  
+  # Add x-axis labels to show the months of the year
+  scale_x_continuous(
+    expand = c(0, 0),
+    breaks = seq(1, 52, length = 12),
+    labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+  ) +
+  
+  # Set the light theme 
+  theme_light() +
+  
+  # Remove any unnecessary labels 
+  theme(
+    axis.title = element_blank()
+  ) +
+  
+  # Add a title 
+  labs(title = "Daily Ridership by Casual Riders \n 08.01.2021 - 07.31.2022")
+
+# Combine the members only and casual riders only heat maps into one with one common legend 
+rides_v_YMD_mem_cas_heat <- ggarrange(
+  rides_v_YMD_mem_heat, 
+  rides_v_YMD_cas_heat, 
+  ncol = 1, 
+  nrow = 2,
+  common.legend = TRUE, 
+  legend = "right"
+  )
+```
+
+Display the resulting heat maps
+
+```{r, echo=FALSE}
+plot(rides_v_YMD_mem_cas_heat)
+```
+
+#### 3.5. Visualization 5: Daily ridership by hour
+
+Create a circular side-by-side bar chart showing the daily ridership
+from 08.01.2021 to 07.31.2022 by hours and by ridership types. Each
+member type has a separate heat map (2 maps created in total).
+
+The idea to analyze, transform and visualize data in this direction as
+well as its execution is adapted and improved from the previous work of
+[Isabella
+Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html).
+
+```{r viz-5}
+# Convert started_at_ToD_byHr in dataframe rides_v_hr back to character 
+# Otherwise the labeling of the circular x-axis (with annotate()) would not be possible
+rides_v_hr$started_at_ToD_byHr <- as.character(rides_v_hr$started_at_ToD_byHr)
+
+# Create a circular bar chart to show the popularity of each hour
+rides_v_hr_circular <- ggplot(rides_v_hr) +
+  
+  ## Make custom panel grid
+  geom_hline(
+    aes(yintercept = y), 
+    data.frame(y = c(0:4) * 125),
+    color = "lightgrey"
+  ) + 
+  
+  ## Create a side-by-side bar chart
+  geom_bar(
+    aes(
+      x = started_at_ToD_byHr,
+      y = numtrips/1000,
+      fill = member_casual
+    ), 
+    stat="identity",
+    position=position_dodge()
+  )+
+  
+  ## Create circular bar chart which starts in the mid-line
+  coord_polar(start = -0.135, direction = 1) +
+  ylim(-600, 500)+
+
+  ## Add x-axis labels showing 24 hours of a day
+  annotate(
+    x = 1,
+    y = -50,
+    label = "00:00",
+    geom = "text",
+    size = 2.5,
+  )+ 
+  annotate(
+    x = 2,
+    y = -50,
+    label = "01:00",
+    geom = "text",
+    size = 3,
+  )+
+  annotate(
+    x = 3,
+    y = -50,
+    label = "02:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 4,
+    y = -50,
+    label = "03:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 5,
+    y = -50,
+    label = "04:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x= 6,
+    y=-50,
+    label = "05:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 7,
+    y = -50,
+    label = "06:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 8,
+    y = -50,
+    label = "07:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 9,
+    y = -50,
+    label = "08:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 10,
+    y = -50,
+    label = "09:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 11,
+    y = -50,
+    label = "10:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 12,
+    y = -50,
+    label = "11:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 13,
+    y = -50,
+    label = "12:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 14,
+    y = -50,
+    label = "13:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 15,
+    y = -50,
+    label = "14:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 16,
+    y = -50,
+    label = "15:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 17,
+    y = -50,
+    label = "16:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 18,
+    y = -50,
+    label = "17:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 19,
+    y = -50,
+    label = "18:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 20,
+    y = -50,
+    label = "19:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 21,
+    y = -50,
+    label = "20:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 22,
+    y = -50,
+    label = "21:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 23,
+    y = -50,
+    label = "22:00",
+    geom = "text",
+    size = 2.5,
+  ) +
+  annotate(
+    x = 24,
+    y = -50,
+    label = "23:00",
+    geom = "text",
+    size = 2.5,
+  )+
+
+  ## Annotate y-axis scaling labels
+  annotate(
+    x = 24,
+    y = 125,
+    label = "125,000 trips",
+    geom = "text",
+    size = 3,
+    angle = 15
+  ) +
+  annotate(
+    x = 24,
+    y = 250,
+    label = "250,000 trips",
+    geom = "text",
+    size = 3,
+    angle = 15
+  ) +
+  annotate(
+    x = 24,
+    y = 375,
+    label = "375,000 trips",
+    geom = "text",
+    size = 3,
+    angle = 15
+  ) +
+
+  ## Apply viridis color palette
+  scale_fill_viridis_d(labels = c("Casual Rider", "Member Rider")) +
+
+  ## Set light theme
+  theme_light() +
+
+  ## Set legend title
+  labs(fill = "Ridership Type")+
+  
+  ## Remove unnecessary labels
+  theme(
+    axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_text(hjust = 0.5),
+  )+
+  
+  ## Add title
+  labs(title = "Total Ridership by Time of Day \n 08.01.2021 - 07.31.2022")
+```
+
+Display the resulting circular bar chart
+
+```{r, echo=FALSE}
+plot(rides_v_hr_circular)
+```
+
+#### 3.6. Visualization 6: Effect of weather on ridership
+
+Create scatter plots showing the effect of weather (temperature, wind
+speed, precipitation) on daily ridership from 08.01.2021 to 07.31.2022
+by ridership types.
+
+The idea to analyze, transform and visualize data in this direction as
+well as its execution is adapted and improved from the previous work of
+[Isabella
+Peel](https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html).
+
+```{r viz-6}
+# Perform garbage collection manually to free up memory in R
+gc()
+
+# Scatter plot 1: Effect of temperature on daily ridership
+avg_temp <- ggplot(
+  rides_v_weather, 
+  aes(
+    x = avg_temp,
+    y = numtrips/1000,
+    color = member_casual
+    )
+  ) + 
+  
+  ## Format scatter points
+  geom_point(
+    size = 2, alpha = 0.5
+  ) +
+  
+  ## Add title and axis labels 
+  labs(
+    title = "Effect of Temperature on Daily Ridership",
+    x = "Average Daily Temperature (C)", 
+    y = "No. of Trips (thousand)"
+  ) +
+  
+  ## Use viridis color palette 
+  scale_color_viridis_d(labels = c("Casual Rider", "Member Rider")) +
+  
+  ##  Set light theme 
+  theme_light() +
+  
+  ## Remove legend title and center title
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )+
+  
+  ## Add legend title
+  labs(color = "Ridership Type")
+
+  
+# Scatter plot 2: Effect of wind speed on daily ridership
+avg_wdspd <- ggplot(
+  rides_v_weather, 
+  aes(
+    x = wind_speed,
+    y = numtrips/1000,
+    color = member_casual
+    )
+  ) + 
+  
+  ## Format scatter points 
+  geom_point(
+    size = 2, alpha = 0.5
+  ) +
+  
+  ## Add title and axis labels 
+  labs(
+    title = "Effect of Wind Speed on Daily Ridership", 
+    x = "Average Daily Wind Speed (m/s)", 
+    y = "No. of Trips (thousand)"
+  ) +
+  
+  ## Use viridis colour scheme 
+  scale_color_viridis_d(labels = c("Casual Rider", "Member Rider")) +
+  
+  ## Set light theme
+  theme_light() +
+
+  ## Remove legend title and center title
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )+
+  
+  ## Add legend title
+  labs(color = "Ridership Type")
+
+
+# Scatter plot 3: Effect of precipitation on daily ridership
+avg_precip <- ggplot(
+  rides_v_weather, 
+  aes(
+    x = precipitation,
+    y = numtrips/1000,
+    color = member_casual
+    )
+  ) + 
+  
+  ## Format scatter points 
+  geom_point(
+    size = 2, alpha = 0.5
+  ) +
+  
+  ## Add title and axis labels 
+  labs(
+    title = "Effect of Precipitation on Daily Ridership", 
+    x = "Average Daily Precipitation (mm)", 
+    y = "No. of Trips (thousand)"
+  ) +
+  
+  ## Use viridis colour scheme 
+  scale_color_viridis_d(labels = c("Casual Rider", "Member Rider")) +
+  
+  ## Set light theme 
+  theme_light() +
+  
+  ## Remove legend title and center title
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )+
+  
+  ## Add legend title
+  labs(color = "Ridership Type")
+  
+# Combine all 3 plots into one visualization 
+rides_v_weather_scatter <- ggarrange(
+  avg_temp, 
+  avg_precip, 
+  avg_wdspd, 
+  ncol = 2, 
+  nrow = 2,
+  common.legend = TRUE, 
+  legend = "bottom"
+)
+```
+
+Display the resulting scatter plots
+
+```{r, echo=FALSE}
+plot(rides_v_weather_scatter)
+```
+
+### 4. Data-visualization: Location (remaining)
+
+#### 4.1. Visualization 13: Monthly mean ride distance with corresponding standard deviation values
+
+Create side-by-side bar charts showing mean ride distance per month per
+ridership types and the respective standard deviation values. Since the
+standard deviation values are quite large in many cases, a side-by-side
+bar chart is used rather than incorporating them in the mean bar chart.
+
+With this plot being similar to those created previously, commenting is
+done minimally.
+
+```{r viz-13}
+# Mean ride distance per Month by ridership type
+rides_distance_perMonth_barM <- ggplot(data=rides_duration_distance_perMonth, 
+                                               aes(x=started_at_month, 
+                                                   
+                                                   # Convert m to km for y-axis
+                                                   y=ride_distance_mean/1000, 
+                                                   fill=member_casual)
+                                       ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  labs(title = "Monthly Mean Ride Distance by Ridership Type \n 08.01.2021 - 07.31.2022")+
+  scale_x_continuous(
+    expand = c(0, 0),
+    breaks = seq(1, 12, length = 12),
+    labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+  xlab("Month") + 
+  ylab("Mean Ride Distance (km)") +
+  theme_light() +
+  scale_fill_viridis_d(labels = c("Casual Rider", "Member Rider")) +
+  labs(fill = "Ridership Type")
+
+# Standard deviation of ride distance per Month by ridership type
+rides_distance_perMonth_barSd <- ggplot(data=rides_duration_distance_perMonth, 
+                                       aes(x=started_at_month, 
+                                           
+                                           # Convert m to km for y-axis
+                                           y=ride_distance_Sd/1000,
+                                           fill=member_casual)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  labs(title = "Standard Deviation of Monthly Ride Distance by Ridership Type \n 08.01.2021 - 07.31.2022")+
+  scale_x_continuous(
+    expand = c(0, 0),
+    breaks = seq(1, 12, length = 12),
+    labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+  xlab("Month") + 
+  ylab("Stdev Value (km)")+
+  theme_light() +
+  scale_fill_viridis_d(labels = c("Casual Rider", "Member Rider")) + 
+  labs(fill = "Ridership Type")
+
+# [Combine the graphs] Monthly ride distance situation by ridership type
+rides_distance_perMonth_bar <- ggarrange(
+  rides_distance_perMonth_barM, 
+  rides_distance_perMonth_barSd, 
+  ncol = 1, 
+  nrow = 2,
+  common.legend = TRUE, 
+  legend = "bottom"
+)
+```
+
+Display the resulting charts
+
+```{r, echo=FALSE}
+plot(rides_distance_perMonth_bar)
+```
+
+### 5. Data-visualization: Time
+
+#### 5.1. Visulaization 14: Monthly mean ride duration with corresponding standard deviation values
+
+Create side-by-side bar charts showing mean ride duration per month per
+ridership types and the respective standard deviation values. Since the
+standard deviation values are quite large in many cases, a side-by-side
+bar chart is used rather than incorporating them in the mean bar chart.
+
+With this plot being similar to those created previously, commenting is
+done minimally.
+
+```{r viz-14}
+# Mean ride duration per Month by ridership type
+rides_duration_perMonth_barM <- ggplot(data=rides_duration_distance_perMonth,
+                                       aes(x=started_at_month, 
+                                           # Convert seconds to minutes for y-axis
+                                           y=ride_duration_mean/60, 
+                                           fill=member_casual)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  labs(title = "Monthly Mean Ride Duration by Ridership Type \n 08.01.2021 - 07.31.2022") +
+  scale_x_continuous(
+    expand = c(0, 0),
+    breaks = seq(1, 12, length = 12),
+    labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+  xlab("Month") + 
+  ylab("Mean Ride Duration (min)")+
+  theme_light() +
+  scale_fill_viridis_d(labels = c("Casual Rider", "Member Rider")) + #use viridis color scheme
+  labs(fill = "Ridership Type")
+
+# Standard deviation of ride duration per Month by ridership type
+rides_duration_perMonth_barSd <- ggplot(data=rides_duration_distance_perMonth, 
+                                               aes(x=started_at_month, 
+                                                   
+                                                   # Convert seconds to minutes for y-axis
+                                                   y=ride_duration_Sd/60, 
+                                                   fill=member_casual)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  labs(title = "Standard Deviation of Monthly Ride Duration by Ridership Type \n 08.01.2021 - 07.31.2022")+
+  scale_x_continuous(
+    expand = c(0, 0),
+    breaks = seq(1, 12, length = 12),
+    labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+  xlab("Month") + 
+  ylab("Stdev Value (min)") +
+  theme_light() +
+  scale_fill_viridis_d(labels = c("Casual Rider", "Member Rider")) +
+  labs(fill = "Ridership Type")
+
+## [Combine the graphs] Monthly ride duration situation by ridership type
+rides_duration_perMonth_bar <- ggarrange(
+  rides_duration_perMonth_barM, 
+  rides_duration_perMonth_barSd, 
+  ncol = 1, 
+  nrow = 2,
+  common.legend = TRUE, 
+  legend = "bottom"
+)
+```
+
+Display the resulting charts
+
+```{r, echo=FALSE}
+plot(rides_duration_perMonth_bar)
+```
+
+### 6. Save the resulting visualizations as .png files
+
+The visualizations are saved individually (rather than in bulk using the
+for loop) to allow individual customization of each figure's scale.
+
+```{r save-viz, results='hide'}
+ggsave(
+  "rides_v_riderships_pie.png",
+  plot = rides_v_riderships_pie,
+  device = NULL,
+  path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots",
+  scale = 3,
+  bg = "white"
+)
+
+ggsave(
+  "rides_v_type_bar.png",
+  plot = rides_v_type_bar,
+  device = NULL,
+  path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots",
+  scale = 3,
+  bg = "white"
+)
+
+ggsave(
+  "rides_v_month_bar.png",
+  plot = rides_v_month_bar,
+  device = NULL,
+  path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots",
+  scale = 3,
+  bg = "white"
+)
+
+ggsave(
+  "rides_v_YMD_mem_cas_heat.png",
+  plot = rides_v_YMD_mem_cas_heat,
+  device = NULL,
+  path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots",
+  scale = 5,
+  bg = "white"
+)
+
+ggsave(
+  "rides_v_hr_circular.png",
+  plot = rides_v_hr_circular,
+  device = NULL,
+  path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots",
+  scale = 5,
+  bg = "white"
+  )
+
+ggsave(
+  "rides_v_weather_scatter.png",
+  plot = rides_v_weather_scatter,
+  device = NULL,
+  path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots",
+  scale = 5,
+  bg = "white"
+)
+
+ggsave(
+  "rides_distance_perMonth_bar.png",
+  plot = rides_distance_perMonth_bar,
+  device = NULL,
+  path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots",
+  scale = 5,
+  bg = "white"
+)
+
+ggsave(
+  "rides_duration_perMonth_bar.png",
+  plot = rides_duration_perMonth_bar,
+  device = NULL,
+  path = "C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Viz/Plots",
+  scale = 5,
+  bg = "white"
+)
+```
