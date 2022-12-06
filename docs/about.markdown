@@ -2,7 +2,7 @@
 layout: page
 title: Overview
 permalink: /Overview/
-navigation_weight: 1
+order: 1
 ---
 
 The **[Bike Share Case Study](https://phucminhle93.github.io/GPC_Case-Study-1/)** is the capstone assignment of the Google Data Analytics Certificate. Its completion marks my successful conclusion of the course and helps showcase some of the skills I have obtained.
