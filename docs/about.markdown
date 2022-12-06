@@ -1,7 +1,7 @@
 ---
 layout: page
 title: The Bike Share Case Study
-permalink: /summary/
+permalink: /Overview/
 ---
 
 ## Summary
