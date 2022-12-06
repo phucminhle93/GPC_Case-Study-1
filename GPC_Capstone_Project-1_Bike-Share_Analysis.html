@@ -1,3 +1,8 @@
+---
+layout: page
+title: Data Transformation
+permalink: /Clean-Transformation.html
+---
 <!DOCTYPE html>
 
 <html>
@@ -9,11 +14,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Phuc Le" />
 
-<meta name="date" content="2022-11-14" />
 
-<title>Bike Share Case Study - Data Transformation</title>
+<title>GPC_Capstone_Project-1_Bike-Share_Analysis.knit</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -356,10 +359,6 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Bike Share Case Study - Data
-Transformation</h1>
-<h4 class="author">Phuc Le</h4>
-<h4 class="date">2022-11-14</h4>
 
 </div>
 
@@ -374,33 +373,75 @@ Data</a></li>
 R</a>
 <ul>
 <li><a href="#preparing-r-for-data-transformation" id="toc-preparing-r-for-data-transformation">1. Preparing R for data
-transformation</a></li>
+transformation</a>
+<ul>
+<li><a href="#install-and-load-necessary-r-packages" id="toc-install-and-load-necessary-r-packages">1.1 Install and load
+necessary R packages</a></li>
+<li><a href="#change-and-view-working-directory" id="toc-change-and-view-working-directory">1.2. Change and view working
+directory</a></li>
+<li><a href="#optional-view-the-content-of-the-working-directory" id="toc-optional-view-the-content-of-the-working-directory">1.3.
+[Optional] View the content of the working directory</a></li>
+</ul></li>
 <li><a href="#import-cleaned-ridership-data-as-dataframes" id="toc-import-cleaned-ridership-data-as-dataframes">2. Import cleaned
 ridership data as dataframes</a></li>
 <li><a href="#calculations-data-manipulations-in-preparation-for-data-transformation" id="toc-calculations-data-manipulations-in-preparation-for-data-transformation">3.
 Calculations/ data manipulations in preparation for data
-transformation</a></li>
+transformation</a>
+<ul>
+<li><a href="#break-down-date-and-time-data-further-into-potentially-useful-elements" id="toc-break-down-date-and-time-data-further-into-potentially-useful-elements">3.1
+Break down date and time data further into potentially useful
+elements</a></li>
+</ul></li>
 <li><a href="#data-transformation-intensity-of-usage" id="toc-data-transformation-intensity-of-usage">4. Data transformation:
-Intensity of Usage</a></li>
+Intensity of Usage</a>
+<ul>
+<li><a href="#create-a-dataframe-of-cyclistics-ridership-by-ridership-types" id="toc-create-a-dataframe-of-cyclistics-ridership-by-ridership-types">4.1.
+Create a dataframe of Cyclistics’ ridership by ridership types</a></li>
+<li><a href="#create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-bike-types" id="toc-create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-bike-types">4.2.
+Create a dataframe of Cyclistics’ ridership by ridership types and bike
+types</a></li>
+<li><a href="#create-dataframes-of-cyclistics-ridership-by-ridership-types-and-various-time-intervals" id="toc-create-dataframes-of-cyclistics-ridership-by-ridership-types-and-various-time-intervals">4.3.
+Create dataframes of Cyclistics’ ridership by ridership types and
+various time intervals</a></li>
+<li><a href="#create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-ride-dates-under-the-respective-weather-conditions" id="toc-create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-ride-dates-under-the-respective-weather-conditions">4.4.
+Create a dataframe of Cyclistics’ ridership by ridership types and ride
+dates, under the respective weather conditions</a></li>
+</ul></li>
 <li><a href="#data-transformation-locations" id="toc-data-transformation-locations">5. Data transformation:
-Locations</a></li>
-<li><a href="#data-transformation-time" id="toc-data-transformation-time">6. Data transformation: Time</a></li>
+Locations</a>
+<ul>
+<li><a href="#create-dataframes-of-cyclistics-ridership-by-ridership-types-and-start-stations" id="toc-create-dataframes-of-cyclistics-ridership-by-ridership-types-and-start-stations">5.1
+Create dataframes of Cyclistics’ ridership by ridership types and start
+stations</a></li>
+<li><a href="#create-dataframes-of-cyclistics-ridership-by-ridership-types-and-end-stations" id="toc-create-dataframes-of-cyclistics-ridership-by-ridership-types-and-end-stations">5.2.
+Create dataframes of Cyclistics’ ridership by ridership types and end
+stations</a></li>
+</ul></li>
+<li><a href="#data-transformation-time" id="toc-data-transformation-time">6. Data transformation: Time</a>
+<ul>
+<li><a href="#create-a-dataframe-of-cyclistics-ridership-including-ride-duration-and-ride-distance-no-groupings" id="toc-create-a-dataframe-of-cyclistics-ridership-including-ride-duration-and-ride-distance-no-groupings">6.1.
+Create a dataframe of Cyclistics’ ridership including ride duration and
+ride distance (no groupings)</a></li>
+<li><a href="#create-dataframes-showing-summaries-of-ride-duration-and-distance-by-ridership-types-and-various-time-intervals" id="toc-create-dataframes-showing-summaries-of-ride-duration-and-distance-by-ridership-types-and-various-time-intervals">6.2.
+Create dataframes showing summaries of ride duration and distance by
+ridership types and various time intervals</a></li>
+</ul></li>
 <li><a href="#save-the-resulting-dataframes-of-transformed-data" id="toc-save-the-resulting-dataframes-of-transformed-data">7. Save the
 resulting dataframes of transformed data</a></li>
 </ul></li>
 </ul>
 </div>
 
-<div id="document-description" class="section level2">
-<h2>Document Description</h2>
+<div id="document-description" class="section level1">
+<h1>Document Description</h1>
 <p>This document is part of the final documentation for The Bike Share
 Case Study. Here, steps to transform the cleaned ridership dataset are
 detailed. These include a description of the methodology and a display
 of written codes for the analyses with respective
 elaborations/remarks.</p>
 </div>
-<div id="summary-of-input-and-output-data" class="section level2">
-<h2>Summary of Input and Output Data</h2>
+<div id="summary-of-input-and-output-data" class="section level1">
+<h1>Summary of Input and Output Data</h1>
 <p>For this Case Study, the <a href="https://divvy-tripdata.s3.amazonaws.com/index.html">Ridership
 Record</a> from 08.01.2021 to 07.31.2022 of the fictional bike-sharing
 company Cyclistics is utilized. This data is made publicly available by
@@ -414,8 +455,8 @@ given question (“How do annual members &amp; casual riders use Cyclistic
 bikes differently?”). These data tables are then saved as csv. files and
 used in the subsequent visualization and analyses.</p>
 </div>
-<div id="methodology" class="section level2">
-<h2>Methodology</h2>
+<div id="methodology" class="section level1">
+<h1>Methodology</h1>
 <p>The transformation and subsequent visualization of the ridership data
 are carried out to answer the Case Study’s the core question:</p>
 <p><em>How do annual members &amp; casual riders use Cyclistics bikes
@@ -443,8 +484,8 @@ process is carried out using R and follows the mind-map below:</p>
 Since the core question concerns the difference between rider types, the
 transformed data is grouped accordingly for eventual comparison.</p>
 </div>
-<div id="terminology" class="section level2">
-<h2>Terminology</h2>
+<div id="terminology" class="section level1">
+<h1>Terminology</h1>
 <p>In completing this case study/assignment, the following terms are
 often used:</p>
 <ul>
@@ -455,12 +496,12 @@ traveling</p></li>
 completed a ride</p></li>
 </ul>
 </div>
-<div id="data-transformation-process-in-r" class="section level2">
-<h2>Data-transformation Process in R</h2>
-<div id="preparing-r-for-data-transformation" class="section level3">
-<h3>1. Preparing R for data transformation</h3>
-<div id="install-and-load-necessary-r-packages" class="section level4">
-<h4>1.1 Install and load necessary R packages</h4>
+<div id="data-transformation-process-in-r" class="section level1">
+<h1>Data-transformation Process in R</h1>
+<div id="preparing-r-for-data-transformation" class="section level2">
+<h2>1. Preparing R for data transformation</h2>
+<div id="install-and-load-necessary-r-packages" class="section level3">
+<h3>1.1 Install and load necessary R packages</h3>
 <pre class="r"><code># Install tidyverse to get packages for everyday data analyses
 install.packages(&quot;tidyverse&quot;, repos = &quot;http://cran.us.r-project.org&quot;)
 
@@ -484,94 +525,331 @@ library(dplyr)
 library(geosphere)
 library(ggpubr) # Added functions to ggplot2</code></pre>
 </div>
-<div id="change-and-view-working-directory" class="section level4">
-<h4>1.2. Change and view working directory</h4>
+<div id="change-and-view-working-directory" class="section level3">
+<h3>1.2. Change and view working directory</h3>
 <pre class="r"><code>getwd() #view path of current (initial) working directory
 
 setwd(&quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone&quot;)
 
 getwd() #view and confirm path of working directory</code></pre>
 </div>
-<div id="optional-view-the-content-of-the-working-directory" class="section level4">
-<h4>1.3. [Optional] View the content of the working directory</h4>
+<div id="optional-view-the-content-of-the-working-directory" class="section level3">
+<h3>1.3. [Optional] View the content of the working directory</h3>
 <pre class="r"><code>list.dirs() </code></pre>
-<pre><code>##   [1] &quot;.&quot;                                  &quot;./CS1_Bike-Share_Data&quot;             
-##   [3] &quot;./CS1_Bike-Share_Data/__MACOSX&quot;     &quot;./CS1_Produced-Dataframes&quot;         
-##   [5] &quot;./CS1_Scripts&quot;                      &quot;./CS1_Scripts/.git&quot;                
-##   [7] &quot;./CS1_Scripts/.git/hooks&quot;           &quot;./CS1_Scripts/.git/info&quot;           
-##   [9] &quot;./CS1_Scripts/.git/logs&quot;            &quot;./CS1_Scripts/.git/logs/refs&quot;      
-##  [11] &quot;./CS1_Scripts/.git/logs/refs/heads&quot; &quot;./CS1_Scripts/.git/objects&quot;        
-##  [13] &quot;./CS1_Scripts/.git/objects/00&quot;      &quot;./CS1_Scripts/.git/objects/02&quot;     
-##  [15] &quot;./CS1_Scripts/.git/objects/06&quot;      &quot;./CS1_Scripts/.git/objects/0c&quot;     
-##  [17] &quot;./CS1_Scripts/.git/objects/10&quot;      &quot;./CS1_Scripts/.git/objects/15&quot;     
-##  [19] &quot;./CS1_Scripts/.git/objects/17&quot;      &quot;./CS1_Scripts/.git/objects/18&quot;     
-##  [21] &quot;./CS1_Scripts/.git/objects/1c&quot;      &quot;./CS1_Scripts/.git/objects/21&quot;     
-##  [23] &quot;./CS1_Scripts/.git/objects/23&quot;      &quot;./CS1_Scripts/.git/objects/25&quot;     
-##  [25] &quot;./CS1_Scripts/.git/objects/27&quot;      &quot;./CS1_Scripts/.git/objects/28&quot;     
-##  [27] &quot;./CS1_Scripts/.git/objects/2a&quot;      &quot;./CS1_Scripts/.git/objects/2b&quot;     
-##  [29] &quot;./CS1_Scripts/.git/objects/2c&quot;      &quot;./CS1_Scripts/.git/objects/2d&quot;     
-##  [31] &quot;./CS1_Scripts/.git/objects/34&quot;      &quot;./CS1_Scripts/.git/objects/36&quot;     
-##  [33] &quot;./CS1_Scripts/.git/objects/3a&quot;      &quot;./CS1_Scripts/.git/objects/3d&quot;     
-##  [35] &quot;./CS1_Scripts/.git/objects/40&quot;      &quot;./CS1_Scripts/.git/objects/45&quot;     
-##  [37] &quot;./CS1_Scripts/.git/objects/46&quot;      &quot;./CS1_Scripts/.git/objects/4a&quot;     
-##  [39] &quot;./CS1_Scripts/.git/objects/4b&quot;      &quot;./CS1_Scripts/.git/objects/4c&quot;     
-##  [41] &quot;./CS1_Scripts/.git/objects/52&quot;      &quot;./CS1_Scripts/.git/objects/53&quot;     
-##  [43] &quot;./CS1_Scripts/.git/objects/54&quot;      &quot;./CS1_Scripts/.git/objects/56&quot;     
-##  [45] &quot;./CS1_Scripts/.git/objects/58&quot;      &quot;./CS1_Scripts/.git/objects/59&quot;     
-##  [47] &quot;./CS1_Scripts/.git/objects/5c&quot;      &quot;./CS1_Scripts/.git/objects/5f&quot;     
-##  [49] &quot;./CS1_Scripts/.git/objects/62&quot;      &quot;./CS1_Scripts/.git/objects/66&quot;     
-##  [51] &quot;./CS1_Scripts/.git/objects/67&quot;      &quot;./CS1_Scripts/.git/objects/6a&quot;     
-##  [53] &quot;./CS1_Scripts/.git/objects/6b&quot;      &quot;./CS1_Scripts/.git/objects/6c&quot;     
-##  [55] &quot;./CS1_Scripts/.git/objects/6f&quot;      &quot;./CS1_Scripts/.git/objects/73&quot;     
-##  [57] &quot;./CS1_Scripts/.git/objects/74&quot;      &quot;./CS1_Scripts/.git/objects/76&quot;     
-##  [59] &quot;./CS1_Scripts/.git/objects/79&quot;      &quot;./CS1_Scripts/.git/objects/7b&quot;     
-##  [61] &quot;./CS1_Scripts/.git/objects/80&quot;      &quot;./CS1_Scripts/.git/objects/82&quot;     
-##  [63] &quot;./CS1_Scripts/.git/objects/84&quot;      &quot;./CS1_Scripts/.git/objects/8c&quot;     
-##  [65] &quot;./CS1_Scripts/.git/objects/90&quot;      &quot;./CS1_Scripts/.git/objects/91&quot;     
-##  [67] &quot;./CS1_Scripts/.git/objects/92&quot;      &quot;./CS1_Scripts/.git/objects/93&quot;     
-##  [69] &quot;./CS1_Scripts/.git/objects/94&quot;      &quot;./CS1_Scripts/.git/objects/95&quot;     
-##  [71] &quot;./CS1_Scripts/.git/objects/96&quot;      &quot;./CS1_Scripts/.git/objects/98&quot;     
-##  [73] &quot;./CS1_Scripts/.git/objects/9d&quot;      &quot;./CS1_Scripts/.git/objects/a0&quot;     
-##  [75] &quot;./CS1_Scripts/.git/objects/a1&quot;      &quot;./CS1_Scripts/.git/objects/a2&quot;     
-##  [77] &quot;./CS1_Scripts/.git/objects/a5&quot;      &quot;./CS1_Scripts/.git/objects/a7&quot;     
-##  [79] &quot;./CS1_Scripts/.git/objects/a8&quot;      &quot;./CS1_Scripts/.git/objects/ab&quot;     
-##  [81] &quot;./CS1_Scripts/.git/objects/af&quot;      &quot;./CS1_Scripts/.git/objects/b1&quot;     
-##  [83] &quot;./CS1_Scripts/.git/objects/b8&quot;      &quot;./CS1_Scripts/.git/objects/b9&quot;     
-##  [85] &quot;./CS1_Scripts/.git/objects/ba&quot;      &quot;./CS1_Scripts/.git/objects/bd&quot;     
-##  [87] &quot;./CS1_Scripts/.git/objects/be&quot;      &quot;./CS1_Scripts/.git/objects/c3&quot;     
-##  [89] &quot;./CS1_Scripts/.git/objects/c4&quot;      &quot;./CS1_Scripts/.git/objects/c5&quot;     
-##  [91] &quot;./CS1_Scripts/.git/objects/c6&quot;      &quot;./CS1_Scripts/.git/objects/cb&quot;     
-##  [93] &quot;./CS1_Scripts/.git/objects/cd&quot;      &quot;./CS1_Scripts/.git/objects/d2&quot;     
-##  [95] &quot;./CS1_Scripts/.git/objects/d3&quot;      &quot;./CS1_Scripts/.git/objects/d4&quot;     
-##  [97] &quot;./CS1_Scripts/.git/objects/d7&quot;      &quot;./CS1_Scripts/.git/objects/d8&quot;     
-##  [99] &quot;./CS1_Scripts/.git/objects/d9&quot;      &quot;./CS1_Scripts/.git/objects/db&quot;     
-## [101] &quot;./CS1_Scripts/.git/objects/de&quot;      &quot;./CS1_Scripts/.git/objects/df&quot;     
-## [103] &quot;./CS1_Scripts/.git/objects/e2&quot;      &quot;./CS1_Scripts/.git/objects/e9&quot;     
-## [105] &quot;./CS1_Scripts/.git/objects/ee&quot;      &quot;./CS1_Scripts/.git/objects/f0&quot;     
-## [107] &quot;./CS1_Scripts/.git/objects/f1&quot;      &quot;./CS1_Scripts/.git/objects/f4&quot;     
-## [109] &quot;./CS1_Scripts/.git/objects/f7&quot;      &quot;./CS1_Scripts/.git/objects/f8&quot;     
-## [111] &quot;./CS1_Scripts/.git/objects/fb&quot;      &quot;./CS1_Scripts/.git/objects/fc&quot;     
-## [113] &quot;./CS1_Scripts/.git/objects/info&quot;    &quot;./CS1_Scripts/.git/objects/pack&quot;   
-## [115] &quot;./CS1_Scripts/.git/refs&quot;            &quot;./CS1_Scripts/.git/refs/heads&quot;     
-## [117] &quot;./CS1_Scripts/.git/refs/tags&quot;       &quot;./CS1_Viz&quot;                         
-## [119] &quot;./CS1_Viz/Maps&quot;                     &quot;./CS1_Viz/Plots&quot;                   
-## [121] &quot;./CS1_Weather-Data&quot;</code></pre>
+<pre><code>##   [1] &quot;.&quot;                                                       
+##   [2] &quot;./CS1_Bike-Share_Data&quot;                                   
+##   [3] &quot;./CS1_Bike-Share_Data/__MACOSX&quot;                          
+##   [4] &quot;./CS1_GitHhub_Upload&quot;                                    
+##   [5] &quot;./CS1_GitHhub_Upload/.git&quot;                               
+##   [6] &quot;./CS1_GitHhub_Upload/.git/hooks&quot;                         
+##   [7] &quot;./CS1_GitHhub_Upload/.git/info&quot;                          
+##   [8] &quot;./CS1_GitHhub_Upload/.git/logs&quot;                          
+##   [9] &quot;./CS1_GitHhub_Upload/.git/logs/refs&quot;                     
+##  [10] &quot;./CS1_GitHhub_Upload/.git/logs/refs/heads&quot;               
+##  [11] &quot;./CS1_GitHhub_Upload/.git/logs/refs/remotes&quot;             
+##  [12] &quot;./CS1_GitHhub_Upload/.git/logs/refs/remotes/origin&quot;      
+##  [13] &quot;./CS1_GitHhub_Upload/.git/objects&quot;                       
+##  [14] &quot;./CS1_GitHhub_Upload/.git/objects/03&quot;                    
+##  [15] &quot;./CS1_GitHhub_Upload/.git/objects/04&quot;                    
+##  [16] &quot;./CS1_GitHhub_Upload/.git/objects/06&quot;                    
+##  [17] &quot;./CS1_GitHhub_Upload/.git/objects/08&quot;                    
+##  [18] &quot;./CS1_GitHhub_Upload/.git/objects/09&quot;                    
+##  [19] &quot;./CS1_GitHhub_Upload/.git/objects/0c&quot;                    
+##  [20] &quot;./CS1_GitHhub_Upload/.git/objects/13&quot;                    
+##  [21] &quot;./CS1_GitHhub_Upload/.git/objects/17&quot;                    
+##  [22] &quot;./CS1_GitHhub_Upload/.git/objects/18&quot;                    
+##  [23] &quot;./CS1_GitHhub_Upload/.git/objects/21&quot;                    
+##  [24] &quot;./CS1_GitHhub_Upload/.git/objects/23&quot;                    
+##  [25] &quot;./CS1_GitHhub_Upload/.git/objects/2a&quot;                    
+##  [26] &quot;./CS1_GitHhub_Upload/.git/objects/30&quot;                    
+##  [27] &quot;./CS1_GitHhub_Upload/.git/objects/32&quot;                    
+##  [28] &quot;./CS1_GitHhub_Upload/.git/objects/36&quot;                    
+##  [29] &quot;./CS1_GitHhub_Upload/.git/objects/38&quot;                    
+##  [30] &quot;./CS1_GitHhub_Upload/.git/objects/3a&quot;                    
+##  [31] &quot;./CS1_GitHhub_Upload/.git/objects/3c&quot;                    
+##  [32] &quot;./CS1_GitHhub_Upload/.git/objects/3d&quot;                    
+##  [33] &quot;./CS1_GitHhub_Upload/.git/objects/3e&quot;                    
+##  [34] &quot;./CS1_GitHhub_Upload/.git/objects/42&quot;                    
+##  [35] &quot;./CS1_GitHhub_Upload/.git/objects/46&quot;                    
+##  [36] &quot;./CS1_GitHhub_Upload/.git/objects/47&quot;                    
+##  [37] &quot;./CS1_GitHhub_Upload/.git/objects/49&quot;                    
+##  [38] &quot;./CS1_GitHhub_Upload/.git/objects/4c&quot;                    
+##  [39] &quot;./CS1_GitHhub_Upload/.git/objects/51&quot;                    
+##  [40] &quot;./CS1_GitHhub_Upload/.git/objects/52&quot;                    
+##  [41] &quot;./CS1_GitHhub_Upload/.git/objects/53&quot;                    
+##  [42] &quot;./CS1_GitHhub_Upload/.git/objects/58&quot;                    
+##  [43] &quot;./CS1_GitHhub_Upload/.git/objects/5c&quot;                    
+##  [44] &quot;./CS1_GitHhub_Upload/.git/objects/64&quot;                    
+##  [45] &quot;./CS1_GitHhub_Upload/.git/objects/66&quot;                    
+##  [46] &quot;./CS1_GitHhub_Upload/.git/objects/67&quot;                    
+##  [47] &quot;./CS1_GitHhub_Upload/.git/objects/6a&quot;                    
+##  [48] &quot;./CS1_GitHhub_Upload/.git/objects/6b&quot;                    
+##  [49] &quot;./CS1_GitHhub_Upload/.git/objects/6d&quot;                    
+##  [50] &quot;./CS1_GitHhub_Upload/.git/objects/6e&quot;                    
+##  [51] &quot;./CS1_GitHhub_Upload/.git/objects/71&quot;                    
+##  [52] &quot;./CS1_GitHhub_Upload/.git/objects/72&quot;                    
+##  [53] &quot;./CS1_GitHhub_Upload/.git/objects/76&quot;                    
+##  [54] &quot;./CS1_GitHhub_Upload/.git/objects/78&quot;                    
+##  [55] &quot;./CS1_GitHhub_Upload/.git/objects/79&quot;                    
+##  [56] &quot;./CS1_GitHhub_Upload/.git/objects/7a&quot;                    
+##  [57] &quot;./CS1_GitHhub_Upload/.git/objects/7b&quot;                    
+##  [58] &quot;./CS1_GitHhub_Upload/.git/objects/80&quot;                    
+##  [59] &quot;./CS1_GitHhub_Upload/.git/objects/82&quot;                    
+##  [60] &quot;./CS1_GitHhub_Upload/.git/objects/83&quot;                    
+##  [61] &quot;./CS1_GitHhub_Upload/.git/objects/84&quot;                    
+##  [62] &quot;./CS1_GitHhub_Upload/.git/objects/87&quot;                    
+##  [63] &quot;./CS1_GitHhub_Upload/.git/objects/89&quot;                    
+##  [64] &quot;./CS1_GitHhub_Upload/.git/objects/8a&quot;                    
+##  [65] &quot;./CS1_GitHhub_Upload/.git/objects/8b&quot;                    
+##  [66] &quot;./CS1_GitHhub_Upload/.git/objects/8d&quot;                    
+##  [67] &quot;./CS1_GitHhub_Upload/.git/objects/8f&quot;                    
+##  [68] &quot;./CS1_GitHhub_Upload/.git/objects/91&quot;                    
+##  [69] &quot;./CS1_GitHhub_Upload/.git/objects/93&quot;                    
+##  [70] &quot;./CS1_GitHhub_Upload/.git/objects/94&quot;                    
+##  [71] &quot;./CS1_GitHhub_Upload/.git/objects/95&quot;                    
+##  [72] &quot;./CS1_GitHhub_Upload/.git/objects/99&quot;                    
+##  [73] &quot;./CS1_GitHhub_Upload/.git/objects/9a&quot;                    
+##  [74] &quot;./CS1_GitHhub_Upload/.git/objects/9e&quot;                    
+##  [75] &quot;./CS1_GitHhub_Upload/.git/objects/a0&quot;                    
+##  [76] &quot;./CS1_GitHhub_Upload/.git/objects/a2&quot;                    
+##  [77] &quot;./CS1_GitHhub_Upload/.git/objects/a5&quot;                    
+##  [78] &quot;./CS1_GitHhub_Upload/.git/objects/a7&quot;                    
+##  [79] &quot;./CS1_GitHhub_Upload/.git/objects/ab&quot;                    
+##  [80] &quot;./CS1_GitHhub_Upload/.git/objects/ac&quot;                    
+##  [81] &quot;./CS1_GitHhub_Upload/.git/objects/b4&quot;                    
+##  [82] &quot;./CS1_GitHhub_Upload/.git/objects/b8&quot;                    
+##  [83] &quot;./CS1_GitHhub_Upload/.git/objects/bf&quot;                    
+##  [84] &quot;./CS1_GitHhub_Upload/.git/objects/c0&quot;                    
+##  [85] &quot;./CS1_GitHhub_Upload/.git/objects/c2&quot;                    
+##  [86] &quot;./CS1_GitHhub_Upload/.git/objects/c5&quot;                    
+##  [87] &quot;./CS1_GitHhub_Upload/.git/objects/c6&quot;                    
+##  [88] &quot;./CS1_GitHhub_Upload/.git/objects/c7&quot;                    
+##  [89] &quot;./CS1_GitHhub_Upload/.git/objects/c8&quot;                    
+##  [90] &quot;./CS1_GitHhub_Upload/.git/objects/ca&quot;                    
+##  [91] &quot;./CS1_GitHhub_Upload/.git/objects/cc&quot;                    
+##  [92] &quot;./CS1_GitHhub_Upload/.git/objects/d0&quot;                    
+##  [93] &quot;./CS1_GitHhub_Upload/.git/objects/d2&quot;                    
+##  [94] &quot;./CS1_GitHhub_Upload/.git/objects/d5&quot;                    
+##  [95] &quot;./CS1_GitHhub_Upload/.git/objects/d7&quot;                    
+##  [96] &quot;./CS1_GitHhub_Upload/.git/objects/d9&quot;                    
+##  [97] &quot;./CS1_GitHhub_Upload/.git/objects/da&quot;                    
+##  [98] &quot;./CS1_GitHhub_Upload/.git/objects/db&quot;                    
+##  [99] &quot;./CS1_GitHhub_Upload/.git/objects/e3&quot;                    
+## [100] &quot;./CS1_GitHhub_Upload/.git/objects/e4&quot;                    
+## [101] &quot;./CS1_GitHhub_Upload/.git/objects/e8&quot;                    
+## [102] &quot;./CS1_GitHhub_Upload/.git/objects/eb&quot;                    
+## [103] &quot;./CS1_GitHhub_Upload/.git/objects/ef&quot;                    
+## [104] &quot;./CS1_GitHhub_Upload/.git/objects/f2&quot;                    
+## [105] &quot;./CS1_GitHhub_Upload/.git/objects/f3&quot;                    
+## [106] &quot;./CS1_GitHhub_Upload/.git/objects/f4&quot;                    
+## [107] &quot;./CS1_GitHhub_Upload/.git/objects/f7&quot;                    
+## [108] &quot;./CS1_GitHhub_Upload/.git/objects/f9&quot;                    
+## [109] &quot;./CS1_GitHhub_Upload/.git/objects/fc&quot;                    
+## [110] &quot;./CS1_GitHhub_Upload/.git/objects/fd&quot;                    
+## [111] &quot;./CS1_GitHhub_Upload/.git/objects/fe&quot;                    
+## [112] &quot;./CS1_GitHhub_Upload/.git/objects/info&quot;                  
+## [113] &quot;./CS1_GitHhub_Upload/.git/objects/pack&quot;                  
+## [114] &quot;./CS1_GitHhub_Upload/.git/refs&quot;                          
+## [115] &quot;./CS1_GitHhub_Upload/.git/refs/heads&quot;                    
+## [116] &quot;./CS1_GitHhub_Upload/.git/refs/remotes&quot;                  
+## [117] &quot;./CS1_GitHhub_Upload/.git/refs/remotes/origin&quot;           
+## [118] &quot;./CS1_GitHhub_Upload/.git/refs/tags&quot;                     
+## [119] &quot;./CS1_GitHhub_Upload/docs&quot;                               
+## [120] &quot;./CS1_GitHhub_Upload/docs/_posts&quot;                        
+## [121] &quot;./CS1_GitHhub_Upload/docs/_site&quot;                         
+## [122] &quot;./CS1_GitHhub_Upload/docs/_site/about&quot;                   
+## [123] &quot;./CS1_GitHhub_Upload/docs/_site/assets&quot;                  
+## [124] &quot;./CS1_GitHhub_Upload/docs/_site/jekyll&quot;                  
+## [125] &quot;./CS1_GitHhub_Upload/docs/_site/jekyll/update&quot;           
+## [126] &quot;./CS1_GitHhub_Upload/docs/_site/jekyll/update/2022&quot;      
+## [127] &quot;./CS1_GitHhub_Upload/docs/_site/jekyll/update/2022/12&quot;   
+## [128] &quot;./CS1_GitHhub_Upload/docs/_site/jekyll/update/2022/12/06&quot;
+## [129] &quot;./CS1_GitHhub_Upload/Maps&quot;                               
+## [130] &quot;./CS1_GitHhub_Upload/Plots&quot;                              
+## [131] &quot;./CS1_Produced-Dataframes&quot;                               
+## [132] &quot;./CS1_Scripts&quot;                                           
+## [133] &quot;./CS1_Scripts/.git&quot;                                      
+## [134] &quot;./CS1_Scripts/.git/hooks&quot;                                
+## [135] &quot;./CS1_Scripts/.git/info&quot;                                 
+## [136] &quot;./CS1_Scripts/.git/logs&quot;                                 
+## [137] &quot;./CS1_Scripts/.git/logs/refs&quot;                            
+## [138] &quot;./CS1_Scripts/.git/logs/refs/heads&quot;                      
+## [139] &quot;./CS1_Scripts/.git/logs/refs/remotes&quot;                    
+## [140] &quot;./CS1_Scripts/.git/logs/refs/remotes/origin&quot;             
+## [141] &quot;./CS1_Scripts/.git/objects&quot;                              
+## [142] &quot;./CS1_Scripts/.git/objects/00&quot;                           
+## [143] &quot;./CS1_Scripts/.git/objects/02&quot;                           
+## [144] &quot;./CS1_Scripts/.git/objects/03&quot;                           
+## [145] &quot;./CS1_Scripts/.git/objects/06&quot;                           
+## [146] &quot;./CS1_Scripts/.git/objects/0c&quot;                           
+## [147] &quot;./CS1_Scripts/.git/objects/10&quot;                           
+## [148] &quot;./CS1_Scripts/.git/objects/13&quot;                           
+## [149] &quot;./CS1_Scripts/.git/objects/15&quot;                           
+## [150] &quot;./CS1_Scripts/.git/objects/17&quot;                           
+## [151] &quot;./CS1_Scripts/.git/objects/18&quot;                           
+## [152] &quot;./CS1_Scripts/.git/objects/1c&quot;                           
+## [153] &quot;./CS1_Scripts/.git/objects/21&quot;                           
+## [154] &quot;./CS1_Scripts/.git/objects/23&quot;                           
+## [155] &quot;./CS1_Scripts/.git/objects/25&quot;                           
+## [156] &quot;./CS1_Scripts/.git/objects/27&quot;                           
+## [157] &quot;./CS1_Scripts/.git/objects/28&quot;                           
+## [158] &quot;./CS1_Scripts/.git/objects/2a&quot;                           
+## [159] &quot;./CS1_Scripts/.git/objects/2b&quot;                           
+## [160] &quot;./CS1_Scripts/.git/objects/2c&quot;                           
+## [161] &quot;./CS1_Scripts/.git/objects/2d&quot;                           
+## [162] &quot;./CS1_Scripts/.git/objects/34&quot;                           
+## [163] &quot;./CS1_Scripts/.git/objects/36&quot;                           
+## [164] &quot;./CS1_Scripts/.git/objects/3a&quot;                           
+## [165] &quot;./CS1_Scripts/.git/objects/3c&quot;                           
+## [166] &quot;./CS1_Scripts/.git/objects/3d&quot;                           
+## [167] &quot;./CS1_Scripts/.git/objects/40&quot;                           
+## [168] &quot;./CS1_Scripts/.git/objects/45&quot;                           
+## [169] &quot;./CS1_Scripts/.git/objects/46&quot;                           
+## [170] &quot;./CS1_Scripts/.git/objects/47&quot;                           
+## [171] &quot;./CS1_Scripts/.git/objects/4a&quot;                           
+## [172] &quot;./CS1_Scripts/.git/objects/4b&quot;                           
+## [173] &quot;./CS1_Scripts/.git/objects/4c&quot;                           
+## [174] &quot;./CS1_Scripts/.git/objects/4e&quot;                           
+## [175] &quot;./CS1_Scripts/.git/objects/52&quot;                           
+## [176] &quot;./CS1_Scripts/.git/objects/53&quot;                           
+## [177] &quot;./CS1_Scripts/.git/objects/54&quot;                           
+## [178] &quot;./CS1_Scripts/.git/objects/56&quot;                           
+## [179] &quot;./CS1_Scripts/.git/objects/58&quot;                           
+## [180] &quot;./CS1_Scripts/.git/objects/59&quot;                           
+## [181] &quot;./CS1_Scripts/.git/objects/5c&quot;                           
+## [182] &quot;./CS1_Scripts/.git/objects/5f&quot;                           
+## [183] &quot;./CS1_Scripts/.git/objects/62&quot;                           
+## [184] &quot;./CS1_Scripts/.git/objects/66&quot;                           
+## [185] &quot;./CS1_Scripts/.git/objects/67&quot;                           
+## [186] &quot;./CS1_Scripts/.git/objects/6a&quot;                           
+## [187] &quot;./CS1_Scripts/.git/objects/6b&quot;                           
+## [188] &quot;./CS1_Scripts/.git/objects/6c&quot;                           
+## [189] &quot;./CS1_Scripts/.git/objects/6f&quot;                           
+## [190] &quot;./CS1_Scripts/.git/objects/73&quot;                           
+## [191] &quot;./CS1_Scripts/.git/objects/74&quot;                           
+## [192] &quot;./CS1_Scripts/.git/objects/76&quot;                           
+## [193] &quot;./CS1_Scripts/.git/objects/78&quot;                           
+## [194] &quot;./CS1_Scripts/.git/objects/79&quot;                           
+## [195] &quot;./CS1_Scripts/.git/objects/7b&quot;                           
+## [196] &quot;./CS1_Scripts/.git/objects/7c&quot;                           
+## [197] &quot;./CS1_Scripts/.git/objects/80&quot;                           
+## [198] &quot;./CS1_Scripts/.git/objects/82&quot;                           
+## [199] &quot;./CS1_Scripts/.git/objects/84&quot;                           
+## [200] &quot;./CS1_Scripts/.git/objects/8c&quot;                           
+## [201] &quot;./CS1_Scripts/.git/objects/90&quot;                           
+## [202] &quot;./CS1_Scripts/.git/objects/91&quot;                           
+## [203] &quot;./CS1_Scripts/.git/objects/92&quot;                           
+## [204] &quot;./CS1_Scripts/.git/objects/93&quot;                           
+## [205] &quot;./CS1_Scripts/.git/objects/94&quot;                           
+## [206] &quot;./CS1_Scripts/.git/objects/95&quot;                           
+## [207] &quot;./CS1_Scripts/.git/objects/96&quot;                           
+## [208] &quot;./CS1_Scripts/.git/objects/98&quot;                           
+## [209] &quot;./CS1_Scripts/.git/objects/99&quot;                           
+## [210] &quot;./CS1_Scripts/.git/objects/9d&quot;                           
+## [211] &quot;./CS1_Scripts/.git/objects/a0&quot;                           
+## [212] &quot;./CS1_Scripts/.git/objects/a1&quot;                           
+## [213] &quot;./CS1_Scripts/.git/objects/a2&quot;                           
+## [214] &quot;./CS1_Scripts/.git/objects/a5&quot;                           
+## [215] &quot;./CS1_Scripts/.git/objects/a7&quot;                           
+## [216] &quot;./CS1_Scripts/.git/objects/a8&quot;                           
+## [217] &quot;./CS1_Scripts/.git/objects/ab&quot;                           
+## [218] &quot;./CS1_Scripts/.git/objects/af&quot;                           
+## [219] &quot;./CS1_Scripts/.git/objects/b1&quot;                           
+## [220] &quot;./CS1_Scripts/.git/objects/b8&quot;                           
+## [221] &quot;./CS1_Scripts/.git/objects/b9&quot;                           
+## [222] &quot;./CS1_Scripts/.git/objects/ba&quot;                           
+## [223] &quot;./CS1_Scripts/.git/objects/bd&quot;                           
+## [224] &quot;./CS1_Scripts/.git/objects/be&quot;                           
+## [225] &quot;./CS1_Scripts/.git/objects/c0&quot;                           
+## [226] &quot;./CS1_Scripts/.git/objects/c3&quot;                           
+## [227] &quot;./CS1_Scripts/.git/objects/c4&quot;                           
+## [228] &quot;./CS1_Scripts/.git/objects/c5&quot;                           
+## [229] &quot;./CS1_Scripts/.git/objects/c6&quot;                           
+## [230] &quot;./CS1_Scripts/.git/objects/cb&quot;                           
+## [231] &quot;./CS1_Scripts/.git/objects/cd&quot;                           
+## [232] &quot;./CS1_Scripts/.git/objects/d2&quot;                           
+## [233] &quot;./CS1_Scripts/.git/objects/d3&quot;                           
+## [234] &quot;./CS1_Scripts/.git/objects/d4&quot;                           
+## [235] &quot;./CS1_Scripts/.git/objects/d6&quot;                           
+## [236] &quot;./CS1_Scripts/.git/objects/d7&quot;                           
+## [237] &quot;./CS1_Scripts/.git/objects/d8&quot;                           
+## [238] &quot;./CS1_Scripts/.git/objects/d9&quot;                           
+## [239] &quot;./CS1_Scripts/.git/objects/db&quot;                           
+## [240] &quot;./CS1_Scripts/.git/objects/de&quot;                           
+## [241] &quot;./CS1_Scripts/.git/objects/df&quot;                           
+## [242] &quot;./CS1_Scripts/.git/objects/e2&quot;                           
+## [243] &quot;./CS1_Scripts/.git/objects/e8&quot;                           
+## [244] &quot;./CS1_Scripts/.git/objects/e9&quot;                           
+## [245] &quot;./CS1_Scripts/.git/objects/ee&quot;                           
+## [246] &quot;./CS1_Scripts/.git/objects/f0&quot;                           
+## [247] &quot;./CS1_Scripts/.git/objects/f1&quot;                           
+## [248] &quot;./CS1_Scripts/.git/objects/f3&quot;                           
+## [249] &quot;./CS1_Scripts/.git/objects/f4&quot;                           
+## [250] &quot;./CS1_Scripts/.git/objects/f7&quot;                           
+## [251] &quot;./CS1_Scripts/.git/objects/f8&quot;                           
+## [252] &quot;./CS1_Scripts/.git/objects/fb&quot;                           
+## [253] &quot;./CS1_Scripts/.git/objects/fc&quot;                           
+## [254] &quot;./CS1_Scripts/.git/objects/info&quot;                         
+## [255] &quot;./CS1_Scripts/.git/objects/pack&quot;                         
+## [256] &quot;./CS1_Scripts/.git/refs&quot;                                 
+## [257] &quot;./CS1_Scripts/.git/refs/heads&quot;                           
+## [258] &quot;./CS1_Scripts/.git/refs/remotes&quot;                         
+## [259] &quot;./CS1_Scripts/.git/refs/remotes/origin&quot;                  
+## [260] &quot;./CS1_Scripts/.git/refs/tags&quot;                            
+## [261] &quot;./CS1_Viz&quot;                                               
+## [262] &quot;./CS1_Viz/.git&quot;                                          
+## [263] &quot;./CS1_Viz/.git/hooks&quot;                                    
+## [264] &quot;./CS1_Viz/.git/info&quot;                                     
+## [265] &quot;./CS1_Viz/.git/logs&quot;                                     
+## [266] &quot;./CS1_Viz/.git/logs/refs&quot;                                
+## [267] &quot;./CS1_Viz/.git/logs/refs/heads&quot;                          
+## [268] &quot;./CS1_Viz/.git/logs/refs/remotes&quot;                        
+## [269] &quot;./CS1_Viz/.git/logs/refs/remotes/origin&quot;                 
+## [270] &quot;./CS1_Viz/.git/objects&quot;                                  
+## [271] &quot;./CS1_Viz/.git/objects/3d&quot;                               
+## [272] &quot;./CS1_Viz/.git/objects/46&quot;                               
+## [273] &quot;./CS1_Viz/.git/objects/4c&quot;                               
+## [274] &quot;./CS1_Viz/.git/objects/52&quot;                               
+## [275] &quot;./CS1_Viz/.git/objects/66&quot;                               
+## [276] &quot;./CS1_Viz/.git/objects/6d&quot;                               
+## [277] &quot;./CS1_Viz/.git/objects/79&quot;                               
+## [278] &quot;./CS1_Viz/.git/objects/83&quot;                               
+## [279] &quot;./CS1_Viz/.git/objects/8a&quot;                               
+## [280] &quot;./CS1_Viz/.git/objects/93&quot;                               
+## [281] &quot;./CS1_Viz/.git/objects/9e&quot;                               
+## [282] &quot;./CS1_Viz/.git/objects/a0&quot;                               
+## [283] &quot;./CS1_Viz/.git/objects/b4&quot;                               
+## [284] &quot;./CS1_Viz/.git/objects/bf&quot;                               
+## [285] &quot;./CS1_Viz/.git/objects/c0&quot;                               
+## [286] &quot;./CS1_Viz/.git/objects/c3&quot;                               
+## [287] &quot;./CS1_Viz/.git/objects/eb&quot;                               
+## [288] &quot;./CS1_Viz/.git/objects/ef&quot;                               
+## [289] &quot;./CS1_Viz/.git/objects/info&quot;                             
+## [290] &quot;./CS1_Viz/.git/objects/pack&quot;                             
+## [291] &quot;./CS1_Viz/.git/refs&quot;                                     
+## [292] &quot;./CS1_Viz/.git/refs/heads&quot;                               
+## [293] &quot;./CS1_Viz/.git/refs/remotes&quot;                             
+## [294] &quot;./CS1_Viz/.git/refs/remotes/origin&quot;                      
+## [295] &quot;./CS1_Viz/.git/refs/tags&quot;                                
+## [296] &quot;./CS1_Viz/Maps&quot;                                          
+## [297] &quot;./CS1_Viz/Plots&quot;                                         
+## [298] &quot;./CS1_Weather-Data&quot;</code></pre>
 </div>
 </div>
-<div id="import-cleaned-ridership-data-as-dataframes" class="section level3">
-<h3>2. Import cleaned ridership data as dataframes</h3>
+<div id="import-cleaned-ridership-data-as-dataframes" class="section level2">
+<h2>2. Import cleaned ridership data as dataframes</h2>
 <pre class="r"><code>rides_cleaned &lt;- fread(&quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/rides_masterdf_cleaned_221030.csv&quot;)
 
 glimpse(rides_cleaned)</code></pre>
 </div>
-<div id="calculations-data-manipulations-in-preparation-for-data-transformation" class="section level3">
-<h3>3. Calculations/ data manipulations in preparation for data
-transformation</h3>
+<div id="calculations-data-manipulations-in-preparation-for-data-transformation" class="section level2">
+<h2>3. Calculations/ data manipulations in preparation for data
+transformation</h2>
 <p>This is a continuation of the preliminary calculations/ data
 manipulation steps done during data-cleaning (step 9).</p>
-<div id="break-down-date-and-time-data-further-into-potentially-useful-elements" class="section level4">
-<h4>3.1 Break down date and time data further into potentially useful
-elements</h4>
+<div id="break-down-date-and-time-data-further-into-potentially-useful-elements" class="section level3">
+<h3>3.1 Break down date and time data further into potentially useful
+elements</h3>
 <p>Here, only the starting date and time of each ride (started_at
 column) is broken down, as it is relevant to subsequent
 transformation/analysis.</p>
@@ -613,11 +891,11 @@ rides_cleaned$started_at_ToD_byHr &lt;- cut(
 glimpse(rides_cleaned)</code></pre>
 </div>
 </div>
-<div id="data-transformation-intensity-of-usage" class="section level3">
-<h3>4. Data transformation: Intensity of Usage</h3>
-<div id="create-a-dataframe-of-cyclistics-ridership-by-ridership-types" class="section level4">
-<h4>4.1. Create a dataframe of Cyclistics’ ridership by ridership
-types</h4>
+<div id="data-transformation-intensity-of-usage" class="section level2">
+<h2>4. Data transformation: Intensity of Usage</h2>
+<div id="create-a-dataframe-of-cyclistics-ridership-by-ridership-types" class="section level3">
+<h3>4.1. Create a dataframe of Cyclistics’ ridership by ridership
+types</h3>
 <p>This dataframe shows the number of rides made by casual riders and
 that made by member riders using Cyclistic bikes from August 01, 2021 to
 July 31, 2022.</p>
@@ -643,9 +921,9 @@ July 31, 2022.</p>
   
 glimpse(rides_v_riderships)</code></pre>
 </div>
-<div id="create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-bike-types" class="section level4">
-<h4>4.2. Create a dataframe of Cyclistics’ ridership by ridership types
-and bike types</h4>
+<div id="create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-bike-types" class="section level3">
+<h3>4.2. Create a dataframe of Cyclistics’ ridership by ridership types
+and bike types</h3>
 <p>This dataframe shows the number of rides made by casual riders and
 that made by member riders using different Cyclistics bike types from
 August 01, 2021 to July 31, 2022.</p>
@@ -677,15 +955,15 @@ rides_v_type_casual &lt;- rides_v_type %&gt;%
 
 glimpse(rides_v_type_casual)</code></pre>
 </div>
-<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-various-time-intervals" class="section level4">
-<h4>4.3. Create dataframes of Cyclistics’ ridership by ridership types
-and various time intervals</h4>
+<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-various-time-intervals" class="section level3">
+<h3>4.3. Create dataframes of Cyclistics’ ridership by ridership types
+and various time intervals</h3>
 <p>The idea to analyze and transform data in this direction and its
 execution is adapted from the previous work of <a href="https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html">Isabella
 Peel</a>.</p>
-<div id="create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-month" class="section level5">
-<h5>4.3.1. Create a dataframe of Cyclistics’ ridership by ridership
-types and month</h5>
+<div id="create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-month" class="section level4">
+<h4>4.3.1. Create a dataframe of Cyclistics’ ridership by ridership
+types and month</h4>
 <pre class="r"><code>  rides_v_month &lt;- rides_cleaned %&gt;%
     
     select(
@@ -725,9 +1003,9 @@ types and month</h5>
   
   glimpse(rides_v_month_casual)</code></pre>
 </div>
-<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-ride-dates-in-yyyy-mm-dd-format." class="section level5">
-<h5>4.3.2. Create dataframes of Cyclistics’ ridership by ridership types
-and ride dates in YYYY-MM-DD format.</h5>
+<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-ride-dates-in-yyyy-mm-dd-format." class="section level4">
+<h4>4.3.2. Create dataframes of Cyclistics’ ridership by ridership types
+and ride dates in YYYY-MM-DD format.</h4>
 <pre class="r"><code>rides_v_YMD &lt;- rides_cleaned %&gt;%
   
   select(
@@ -767,9 +1045,9 @@ rides_v_YMD_casual &lt;- rides_v_YMD %&gt;%
 
 glimpse(rides_v_YMD_casual)</code></pre>
 </div>
-<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-time-hour-of-day." class="section level5">
-<h5>4.3.3. Create dataframes of Cyclistics’ ridership by ridership types
-and time (hour) of day.</h5>
+<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-time-hour-of-day." class="section level4">
+<h4>4.3.3. Create dataframes of Cyclistics’ ridership by ridership types
+and time (hour) of day.</h4>
 <pre class="r"><code># create new dataframes from rides_cleaned with just rides and time info 
 ## grouped by memeber type and started_at_ToD
 rides_v_hr &lt;- rides_cleaned %&gt;%
@@ -812,9 +1090,9 @@ rides_v_hr_casual &lt;- rides_v_hr %&gt;%
 glimpse(rides_v_hr_casual)</code></pre>
 </div>
 </div>
-<div id="create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-ride-dates-under-the-respective-weather-conditions" class="section level4">
-<h4>4.4. Create a dataframe of Cyclistics’ ridership by ridership types
-and ride dates, under the respective weather conditions</h4>
+<div id="create-a-dataframe-of-cyclistics-ridership-by-ridership-types-and-ride-dates-under-the-respective-weather-conditions" class="section level3">
+<h3>4.4. Create a dataframe of Cyclistics’ ridership by ridership types
+and ride dates, under the respective weather conditions</h3>
 <p>The idea to analyze and transform data in this direction and its
 execution is adapted from the previous work of <a href="https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html">Isabella
 Peel</a>.</p>
@@ -851,11 +1129,11 @@ rides_v_weather &lt;- merge(x=rides_v_YMD,y=weather_tavg_prcp_wnd,by=&quot;start
 glimpse(rides_v_weather)</code></pre>
 </div>
 </div>
-<div id="data-transformation-locations" class="section level3">
-<h3>5. Data transformation: Locations</h3>
-<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-start-stations" class="section level4">
-<h4>5.1 Create dataframes of Cyclistics’ ridership by ridership types
-and start stations</h4>
+<div id="data-transformation-locations" class="section level2">
+<h2>5. Data transformation: Locations</h2>
+<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-start-stations" class="section level3">
+<h3>5.1 Create dataframes of Cyclistics’ ridership by ridership types
+and start stations</h3>
 <p>The idea to analyze and transform data in this direction and its
 execution is adapted from the previous work of <a href="https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html">Isabella
 Peel</a>.</p>
@@ -909,9 +1187,9 @@ rides_v_startstation_casual &lt;- rides_v_startstation %&gt;%
 rides_v_startstation_casual &lt;-rides_v_startstation_casual[order(rides_v_startstation_casual$numtrips, decreasing = TRUE),] 
 glimpse(rides_v_startstation_casual)</code></pre>
 </div>
-<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-end-stations" class="section level4">
-<h4>5.2. Create dataframes of Cyclistics’ ridership by ridership types
-and end stations</h4>
+<div id="create-dataframes-of-cyclistics-ridership-by-ridership-types-and-end-stations" class="section level3">
+<h3>5.2. Create dataframes of Cyclistics’ ridership by ridership types
+and end stations</h3>
 <pre class="r"><code>rides_v_endstation_all &lt;- rides_cleaned %&gt;%
   select(
     end_station_name, 
@@ -963,11 +1241,11 @@ rides_v_endstation_casual &lt;-rides_v_endstation_casual[order(rides_v_endstatio
 glimpse(rides_v_endstation_casual)</code></pre>
 </div>
 </div>
-<div id="data-transformation-time" class="section level3">
-<h3>6. Data transformation: Time</h3>
-<div id="create-a-dataframe-of-cyclistics-ridership-including-ride-duration-and-ride-distance-no-groupings" class="section level4">
-<h4>6.1. Create a dataframe of Cyclistics’ ridership including ride
-duration and ride distance (no groupings)</h4>
+<div id="data-transformation-time" class="section level2">
+<h2>6. Data transformation: Time</h2>
+<div id="create-a-dataframe-of-cyclistics-ridership-including-ride-duration-and-ride-distance-no-groupings" class="section level3">
+<h3>6.1. Create a dataframe of Cyclistics’ ridership including ride
+duration and ride distance (no groupings)</h3>
 <pre class="r"><code># create new dataframes from rides_cleaned with rides, ride distance, duration, among others (note: ride_duration in seconds)
 rides_duration_distance &lt;- rides_cleaned %&gt;%
   select(
@@ -988,9 +1266,9 @@ rides_duration_distance &lt;- rides_cleaned %&gt;%
     ride_distance
   )</code></pre>
 </div>
-<div id="create-dataframes-showing-summaries-of-ride-duration-and-distance-by-ridership-types-and-various-time-intervals" class="section level4">
-<h4>6.2. Create dataframes showing summaries of ride duration and
-distance by ridership types and various time intervals</h4>
+<div id="create-dataframes-showing-summaries-of-ride-duration-and-distance-by-ridership-types-and-various-time-intervals" class="section level3">
+<h3>6.2. Create dataframes showing summaries of ride duration and
+distance by ridership types and various time intervals</h3>
 <pre class="r"><code># mean duration (sec) and mean distance (m) per month by ridership type
 rides_duration_distance_perMonth &lt;- rides_duration_distance%&gt;%
   group_by(member_casual, started_at_month) %&gt;%
@@ -1021,8 +1299,8 @@ distances is performed alongside with that in relation to ride duration
 in this step due to similarities in the coding and outputs.</em></p>
 </div>
 </div>
-<div id="save-the-resulting-dataframes-of-transformed-data" class="section level3">
-<h3>7. Save the resulting dataframes of transformed data</h3>
+<div id="save-the-resulting-dataframes-of-transformed-data" class="section level2">
+<h2>7. Save the resulting dataframes of transformed data</h2>
 <p>With the data transformation process producing many useful dataframes
 that need to be saved, a “for” loop is used rather than individual
 fwrite’s.</p>
