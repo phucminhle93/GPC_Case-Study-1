@@ -1,6 +1,7 @@
 ---
-permalink: /test.html
-layout: default
+layout: page
+title: Data Cleaning
+permalink: /Clean-Data.html
 ---
 
 <!DOCTYPE html>
@@ -16,9 +17,9 @@ layout: default
 
 <meta name="author" content="Phuc Le" />
 
-<meta name="date" content="2022-12-05" />
+<meta name="date" content="2022-11-09" />
 
-<title>Bike Share Case Study</title>
+<title>Bike Share Case Study - Cleaning Raw Data</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -361,42 +362,798 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Bike Share Case Study</h1>
+<h1 class="title toc-ignore">Bike Share Case Study - Cleaning Raw
+Data</h1>
 <h4 class="author">Phuc Le</h4>
-<h4 class="date">2022-12-05</h4>
+<h4 class="date">2022-11-09</h4>
 
 </div>
 
 <div id="TOC">
 <ul>
-<li><a href="#summary" id="toc-summary">Summary</a></li>
-<li><a href="#description-of-case-study" id="toc-description-of-case-study">Description of Case Study</a></li>
+<li><a href="#document-description" id="toc-document-description">Document Description</a></li>
+<li><a href="#description-of-raw-data" id="toc-description-of-raw-data">Description of Raw Data</a></li>
+<li><a href="#data-cleaning-methodology" id="toc-data-cleaning-methodology">Data-cleaning Methodology</a></li>
+<li><a href="#data-cleaning-process-in-r" id="toc-data-cleaning-process-in-r">Data-cleaning Process in R</a>
+<ul>
+<li><a href="#step-1.-preparing-r-for-cleaning-data" id="toc-step-1.-preparing-r-for-cleaning-data">Step 1. Preparing R for
+cleaning data</a></li>
+<li><a href="#step-2.-import-raw-data-of-cyclistics-ridership-from-08.01.2021-to-07.31.2022-as-dataframes" id="toc-step-2.-import-raw-data-of-cyclistics-ridership-from-08.01.2021-to-07.31.2022-as-dataframes">Step
+2. Import raw data of Cyclistics’ ridership from 08.01.2021 to
+07.31.2022 as dataframes</a></li>
+<li><a href="#step-3.-display-and-inspect-imported-dataframes" id="toc-step-3.-display-and-inspect-imported-dataframes">Step 3. Display
+and inspect imported dataframes</a></li>
+<li><a href="#step-4.-combine-the-raw-inspected-ridership-dataframes-into-a-single-dataframe" id="toc-step-4.-combine-the-raw-inspected-ridership-dataframes-into-a-single-dataframe">Step
+4. Combine the raw (inspected) ridership dataframes into a single
+dataframe</a></li>
+<li><a href="#step-5.-remove-empty-spaces-and-rowsdatapoints" id="toc-step-5.-remove-empty-spaces-and-rowsdatapoints">Step 5. Remove
+empty spaces and rows/datapoints</a></li>
+<li><a href="#step-6.-remove-duplicated-data-points" id="toc-step-6.-remove-duplicated-data-points">Step 6. Remove duplicated
+data points</a></li>
+<li><a href="#step-7.-remove-incompleteinvalid-rows-data-points" id="toc-step-7.-remove-incompleteinvalid-rows-data-points">Step 7.
+Remove incomplete/invalid rows/ data points</a></li>
+<li><a href="#step-8.-change-andor-supplement-data-types" id="toc-step-8.-change-andor-supplement-data-types">Step 8. Change
+and/or supplement data types</a></li>
+<li><a href="#step-9.-perform-preliminary-calculations-data-manipulations" id="toc-step-9.-perform-preliminary-calculations-data-manipulations">Step
+9. Perform preliminary calculations/ data manipulations</a></li>
+<li><a href="#step-10.-save-the-cleaned-dataset-and-other-relevant-datasets." id="toc-step-10.-save-the-cleaned-dataset-and-other-relevant-datasets.">Step
+10. Save the cleaned dataset and other relevant datasets.<br />
+</a></li>
+</ul></li>
 </ul>
 </div>
 
-<div id="summary" class="section level2">
-<h2>Summary</h2>
-<p>The Bike Share Case Study is the capstone assignment of the Google
-Data Analytics Certificate. Its completion marks my successful
-conclusion of the course and helps showcase some of the skills I have
-obtained.</p>
+<div id="document-description" class="section level2">
+<h2>Document Description</h2>
+<p>This document is part of the final documentation for The Bike Share
+Case Study. Here, the cleaning process of raw data for subsequent
+analysis is detailed. This includes a description of the methodology, a
+display of written codes to achieve the cleaned datasets, and respective
+elaborations/remarks.</p>
 </div>
-<div id="description-of-case-study" class="section level2">
-<h2>Description of Case Study</h2>
-<p>In the Bike Share case study, the historical <a href="https://divvy-tripdata.s3.amazonaws.com/index.html">Ridership
-Record</a> of the fictional company Cyclistics is examined to provide
-insights about its bike-sharing service in the Chicago area. In
-specific, differences in the usage of the bike-share service between
-casual and member riders are explored. These insights would supposedly
-help inform an upcoming marketing campaign.</p>
-<p>The case study is carried out in four steps. First, the necessary raw
-data from Cyclistics is downloaded and cleaned (1). The cleaned data is
-then transformed (2) and visualized (3) to address relevant aspects of
-Cyclistics’ ride-share service. Finally, the insights are documented in
-a final report (4).</p>
-<p>All steps of the case study are carried out using the programming
-language R due to its ease of use, versatility, cost efficiency, as well
-as the high availability of communities and resources.</p>
+<div id="description-of-raw-data" class="section level2">
+<h2>Description of Raw Data</h2>
+<p>For this Case Study, 12 recent months of the <a href="https://divvy-tripdata.s3.amazonaws.com/index.html">Ridership
+Record</a> of the fictional bike-sharing company Cyclistics is utilized.
+This data is made publicly available by Motivate International
+Inc. under this <a href="https://ride.divvybikes.com/data-license-agreement">Licencse</a>.</p>
+<p>The utilized raw datasets consists of information on all bike rides
+(or trips), made by Cyclistics’ users in Chicago from 08.01.2021 to
+07.31.2022. The datasets/ ridership record is stored by month in 12
+downloadable .csv files. For each recorded rides, the following
+information may be recorded:</p>
+<ul>
+<li>Ride ID<br />
+</li>
+<li>Type of bike<br />
+</li>
+<li>Start time of the ride<br />
+</li>
+<li>End time of the ride<br />
+</li>
+<li>Start station of the ride (name, ID, latitude and longitude in
+separate columns)<br />
+</li>
+<li>End station of the ride (name, ID, latitude and longitude in
+separate columns)<br />
+</li>
+<li>Ridership Type (rider is a casual rider or a member of
+Cyclistics)</li>
+</ul>
+</div>
+<div id="data-cleaning-methodology" class="section level2">
+<h2>Data-cleaning Methodology</h2>
+<p>The raw datasets are downloaded, then cleaned using R.</p>
+<p>A top-down approach is roughly adopted for cleaning the raw datasets.
+This means that higher-level, more consistent discrepancies are
+addressed before less obvious ones. Furthermore, detecting and removing
+discrepancies/invalid data takes precedent, following by editing and
+adding to the datasets. The specific data-cleaning procedure is outlined
+below:</p>
+<ol style="list-style-type: decimal">
+<li>Preparing R for cleaning data (install and load packages, update
+working directory)<br />
+</li>
+<li>Download and Import all required datasets as dataframes (i.e., .csv
+files)<br />
+</li>
+<li>Display and inspect “snippets” of the datasets for understanding and
+initial detection of discrepancies that would otherwise be more
+difficult to detect after combining, such as the data type in each
+column<br />
+</li>
+<li>Combine the separated raw datasets into a single
+dataset/dataframe<br />
+</li>
+<li>Remove empty spaces and empty rows/data points<br />
+</li>
+<li>Remove duplicated data points (e.g., repeated ride IDs)<br />
+</li>
+<li>Remove incomplete/invalid rows/ data points<br />
+</li>
+<li>Change/Supplement data types (e.g., converting date data to
+different formats)<br />
+</li>
+<li>[Optional] Manipulate data for subsequent analyses (e.g. adding
+columns of calculated values)<br />
+</li>
+<li>Save the cleaned dataset and other relevant datasets.<br />
+</li>
+</ol>
+</div>
+<div id="data-cleaning-process-in-r" class="section level2">
+<h2>Data-cleaning Process in R</h2>
+<div id="step-1.-preparing-r-for-cleaning-data" class="section level3">
+<h3>Step 1. Preparing R for cleaning data</h3>
+<div id="install-and-load-necessary-r-packages" class="section level4">
+<h4>1.1 Install and load necessary R packages</h4>
+<pre class="r"><code># Install tidyverse to get packages for everyday data analyses
+install.packages(&quot;tidyverse&quot;, repos = &quot;http://cran.us.r-project.org&quot;)
+
+# Install skimr to provide summary statistics about variables in data frames, tibbles, data tables and vectors
+install.packages(&quot;skimr&quot;, repos = &quot;http://cran.us.r-project.org&quot;)
+
+# Install janitor for Examining and Cleaning Dirty Data.
+install.packages(&quot;janitor&quot;, repos = &quot;http://cran.us.r-project.org&quot;)
+
+# Install geosphere for functions that compute various aspects of distance, direction, area, etc. for geographic (geodetic) coordinates.
+install.packages(&quot;geosphere&quot;, repos = &quot;http://cran.us.r-project.org&quot;)
+
+# Load packages
+library(tidyverse)
+library(data.table)
+library(lubridate)
+library(ggplot2)
+library(skimr)
+library(janitor)
+library(dplyr)
+library(geosphere)</code></pre>
+</div>
+<div id="change-and-view-working-directory" class="section level4">
+<h4>1.2. Change and view working directory</h4>
+<pre class="r"><code>getwd() #view path of current (initial) working directory
+
+setwd(&quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/&quot;)
+
+getwd() #view and confirm path of working directory</code></pre>
+</div>
+<div id="optional-view-the-content-of-the-working-directory" class="section level4">
+<h4>1.3. [Optional] View the content of the working directory</h4>
+<pre class="r"><code>list.dirs() </code></pre>
+<pre><code>##   [1] &quot;.&quot;                                  &quot;./CS1_Bike-Share_Data&quot;             
+##   [3] &quot;./CS1_Bike-Share_Data/__MACOSX&quot;     &quot;./CS1_Produced-Dataframes&quot;         
+##   [5] &quot;./CS1_Scripts&quot;                      &quot;./CS1_Scripts/.git&quot;                
+##   [7] &quot;./CS1_Scripts/.git/hooks&quot;           &quot;./CS1_Scripts/.git/info&quot;           
+##   [9] &quot;./CS1_Scripts/.git/logs&quot;            &quot;./CS1_Scripts/.git/logs/refs&quot;      
+##  [11] &quot;./CS1_Scripts/.git/logs/refs/heads&quot; &quot;./CS1_Scripts/.git/objects&quot;        
+##  [13] &quot;./CS1_Scripts/.git/objects/00&quot;      &quot;./CS1_Scripts/.git/objects/02&quot;     
+##  [15] &quot;./CS1_Scripts/.git/objects/06&quot;      &quot;./CS1_Scripts/.git/objects/0c&quot;     
+##  [17] &quot;./CS1_Scripts/.git/objects/10&quot;      &quot;./CS1_Scripts/.git/objects/15&quot;     
+##  [19] &quot;./CS1_Scripts/.git/objects/17&quot;      &quot;./CS1_Scripts/.git/objects/18&quot;     
+##  [21] &quot;./CS1_Scripts/.git/objects/1c&quot;      &quot;./CS1_Scripts/.git/objects/21&quot;     
+##  [23] &quot;./CS1_Scripts/.git/objects/23&quot;      &quot;./CS1_Scripts/.git/objects/25&quot;     
+##  [25] &quot;./CS1_Scripts/.git/objects/27&quot;      &quot;./CS1_Scripts/.git/objects/28&quot;     
+##  [27] &quot;./CS1_Scripts/.git/objects/2a&quot;      &quot;./CS1_Scripts/.git/objects/2b&quot;     
+##  [29] &quot;./CS1_Scripts/.git/objects/2c&quot;      &quot;./CS1_Scripts/.git/objects/2d&quot;     
+##  [31] &quot;./CS1_Scripts/.git/objects/34&quot;      &quot;./CS1_Scripts/.git/objects/36&quot;     
+##  [33] &quot;./CS1_Scripts/.git/objects/3a&quot;      &quot;./CS1_Scripts/.git/objects/3d&quot;     
+##  [35] &quot;./CS1_Scripts/.git/objects/40&quot;      &quot;./CS1_Scripts/.git/objects/45&quot;     
+##  [37] &quot;./CS1_Scripts/.git/objects/46&quot;      &quot;./CS1_Scripts/.git/objects/4a&quot;     
+##  [39] &quot;./CS1_Scripts/.git/objects/4b&quot;      &quot;./CS1_Scripts/.git/objects/4c&quot;     
+##  [41] &quot;./CS1_Scripts/.git/objects/52&quot;      &quot;./CS1_Scripts/.git/objects/53&quot;     
+##  [43] &quot;./CS1_Scripts/.git/objects/54&quot;      &quot;./CS1_Scripts/.git/objects/56&quot;     
+##  [45] &quot;./CS1_Scripts/.git/objects/58&quot;      &quot;./CS1_Scripts/.git/objects/59&quot;     
+##  [47] &quot;./CS1_Scripts/.git/objects/5c&quot;      &quot;./CS1_Scripts/.git/objects/5f&quot;     
+##  [49] &quot;./CS1_Scripts/.git/objects/62&quot;      &quot;./CS1_Scripts/.git/objects/66&quot;     
+##  [51] &quot;./CS1_Scripts/.git/objects/67&quot;      &quot;./CS1_Scripts/.git/objects/6a&quot;     
+##  [53] &quot;./CS1_Scripts/.git/objects/6b&quot;      &quot;./CS1_Scripts/.git/objects/6c&quot;     
+##  [55] &quot;./CS1_Scripts/.git/objects/6f&quot;      &quot;./CS1_Scripts/.git/objects/73&quot;     
+##  [57] &quot;./CS1_Scripts/.git/objects/74&quot;      &quot;./CS1_Scripts/.git/objects/76&quot;     
+##  [59] &quot;./CS1_Scripts/.git/objects/79&quot;      &quot;./CS1_Scripts/.git/objects/7b&quot;     
+##  [61] &quot;./CS1_Scripts/.git/objects/80&quot;      &quot;./CS1_Scripts/.git/objects/82&quot;     
+##  [63] &quot;./CS1_Scripts/.git/objects/84&quot;      &quot;./CS1_Scripts/.git/objects/8c&quot;     
+##  [65] &quot;./CS1_Scripts/.git/objects/90&quot;      &quot;./CS1_Scripts/.git/objects/91&quot;     
+##  [67] &quot;./CS1_Scripts/.git/objects/92&quot;      &quot;./CS1_Scripts/.git/objects/93&quot;     
+##  [69] &quot;./CS1_Scripts/.git/objects/94&quot;      &quot;./CS1_Scripts/.git/objects/95&quot;     
+##  [71] &quot;./CS1_Scripts/.git/objects/96&quot;      &quot;./CS1_Scripts/.git/objects/98&quot;     
+##  [73] &quot;./CS1_Scripts/.git/objects/9d&quot;      &quot;./CS1_Scripts/.git/objects/a0&quot;     
+##  [75] &quot;./CS1_Scripts/.git/objects/a1&quot;      &quot;./CS1_Scripts/.git/objects/a2&quot;     
+##  [77] &quot;./CS1_Scripts/.git/objects/a5&quot;      &quot;./CS1_Scripts/.git/objects/a7&quot;     
+##  [79] &quot;./CS1_Scripts/.git/objects/a8&quot;      &quot;./CS1_Scripts/.git/objects/ab&quot;     
+##  [81] &quot;./CS1_Scripts/.git/objects/af&quot;      &quot;./CS1_Scripts/.git/objects/b1&quot;     
+##  [83] &quot;./CS1_Scripts/.git/objects/b8&quot;      &quot;./CS1_Scripts/.git/objects/b9&quot;     
+##  [85] &quot;./CS1_Scripts/.git/objects/ba&quot;      &quot;./CS1_Scripts/.git/objects/bd&quot;     
+##  [87] &quot;./CS1_Scripts/.git/objects/be&quot;      &quot;./CS1_Scripts/.git/objects/c3&quot;     
+##  [89] &quot;./CS1_Scripts/.git/objects/c4&quot;      &quot;./CS1_Scripts/.git/objects/c5&quot;     
+##  [91] &quot;./CS1_Scripts/.git/objects/c6&quot;      &quot;./CS1_Scripts/.git/objects/cb&quot;     
+##  [93] &quot;./CS1_Scripts/.git/objects/cd&quot;      &quot;./CS1_Scripts/.git/objects/d2&quot;     
+##  [95] &quot;./CS1_Scripts/.git/objects/d3&quot;      &quot;./CS1_Scripts/.git/objects/d4&quot;     
+##  [97] &quot;./CS1_Scripts/.git/objects/d7&quot;      &quot;./CS1_Scripts/.git/objects/d8&quot;     
+##  [99] &quot;./CS1_Scripts/.git/objects/d9&quot;      &quot;./CS1_Scripts/.git/objects/db&quot;     
+## [101] &quot;./CS1_Scripts/.git/objects/de&quot;      &quot;./CS1_Scripts/.git/objects/df&quot;     
+## [103] &quot;./CS1_Scripts/.git/objects/e2&quot;      &quot;./CS1_Scripts/.git/objects/e9&quot;     
+## [105] &quot;./CS1_Scripts/.git/objects/ee&quot;      &quot;./CS1_Scripts/.git/objects/f0&quot;     
+## [107] &quot;./CS1_Scripts/.git/objects/f1&quot;      &quot;./CS1_Scripts/.git/objects/f4&quot;     
+## [109] &quot;./CS1_Scripts/.git/objects/f7&quot;      &quot;./CS1_Scripts/.git/objects/f8&quot;     
+## [111] &quot;./CS1_Scripts/.git/objects/fb&quot;      &quot;./CS1_Scripts/.git/objects/fc&quot;     
+## [113] &quot;./CS1_Scripts/.git/objects/info&quot;    &quot;./CS1_Scripts/.git/objects/pack&quot;   
+## [115] &quot;./CS1_Scripts/.git/refs&quot;            &quot;./CS1_Scripts/.git/refs/heads&quot;     
+## [117] &quot;./CS1_Scripts/.git/refs/tags&quot;       &quot;./CS1_Scripts/Viz&quot;                 
+## [119] &quot;./CS1_Scripts/Viz/Maps&quot;             &quot;./CS1_Scripts/Viz/Plots&quot;           
+## [121] &quot;./CS1_Weather-Data&quot;</code></pre>
+</div>
+</div>
+<div id="step-2.-import-raw-data-of-cyclistics-ridership-from-08.01.2021-to-07.31.2022-as-dataframes" class="section level3">
+<h3>Step 2. Import raw data of Cyclistics’ ridership from 08.01.2021 to
+07.31.2022 as dataframes</h3>
+<pre class="r"><code>rides_2207 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202207-divvy-tripdata.csv&quot;)
+rides_2206 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202206-divvy-tripdata.csv&quot;)
+rides_2205 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202205-divvy-tripdata.csv&quot;)
+rides_2204 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202204-divvy-tripdata.csv&quot;)
+rides_2203 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202203-divvy-tripdata.csv&quot;)
+rides_2202 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202202-divvy-tripdata.csv&quot;)
+rides_2201 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202201-divvy-tripdata.csv&quot;)
+rides_2112 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202112-divvy-tripdata.csv&quot;)
+rides_2111 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202111-divvy-tripdata.csv&quot;)
+rides_2110 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202110-divvy-tripdata.csv&quot;)
+rides_2109 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202109-divvy-tripdata.csv&quot;)
+rides_2108 &lt;- read.csv(file = &quot;CS1_Bike-Share_Data/202108-divvy-tripdata.csv&quot;)</code></pre>
+</div>
+<div id="step-3.-display-and-inspect-imported-dataframes" class="section level3">
+<h3>Step 3. Display and inspect imported dataframes</h3>
+<div id="test-to-confirm-that-all-imported-dataframes-have-the-same-column-number-and-names" class="section level4">
+<h4>3.1 Test to confirm that all imported dataframes have the same
+column number and names</h4>
+<pre class="r"><code># Check number of columns using ncol()
+ncol(rides_2207)
+ncol(rides_2206)
+ncol(rides_2205)
+ncol(rides_2204)
+ncol(rides_2203)
+ncol(rides_2202)
+ncol(rides_2201)
+ncol(rides_2112)
+ncol(rides_2111)
+ncol(rides_2110)
+ncol(rides_2109)
+ncol(rides_2108)
+
+# Check column names using colnames()
+colnames(rides_2207)
+colnames(rides_2206)
+colnames(rides_2205)
+colnames(rides_2204)
+colnames(rides_2203)
+colnames(rides_2202)
+colnames(rides_2201)
+colnames(rides_2112)
+colnames(rides_2111)
+colnames(rides_2110)
+colnames(rides_2109)
+colnames(rides_2108)</code></pre>
+</div>
+<div id="summarize-and-inspect-the-consistency-of-the-data-types-of-the-imported-dataframes" class="section level4">
+<h4>3.2. Summarize and inspect the consistency of the data types of the
+imported dataframes</h4>
+<pre class="r"><code>coltype_rides_2207 &lt;- data.frame(Type_rides_2207=sapply(rides_2207,class))
+coltype_rides_2206 &lt;- data.frame(Type_rides_2206=sapply(rides_2206,class))
+coltype_rides_2205 &lt;- data.frame(Type_rides_2205=sapply(rides_2205,class))
+coltype_rides_2204 &lt;- data.frame(Type_rides_2204=sapply(rides_2204,class))
+coltype_rides_2203 &lt;- data.frame(Type_rides_2203=sapply(rides_2203,class))
+coltype_rides_2202 &lt;- data.frame(Type_rides_2202=sapply(rides_2202,class))
+coltype_rides_2201 &lt;- data.frame(Type_rides_2201=sapply(rides_2201,class))
+coltype_rides_2112 &lt;- data.frame(Type_rides_2112=sapply(rides_2112,class))
+coltype_rides_2111 &lt;- data.frame(Type_rides_2111=sapply(rides_2111,class))
+coltype_rides_2110 &lt;- data.frame(Type_rides_2110=sapply(rides_2110,class))
+coltype_rides_2109 &lt;- data.frame(Type_rides_2109=sapply(rides_2109,class))
+coltype_rides_2108 &lt;- data.frame(Type_rides_2108=sapply(rides_2108,class))
+
+coltype_all_df &lt;- cbind(coltype_rides_2207, coltype_rides_2206, 
+                        coltype_rides_2205, coltype_rides_2204,  
+                        coltype_rides_2203, coltype_rides_2202,
+                        coltype_rides_2201, coltype_rides_2112,
+                        coltype_rides_2111, coltype_rides_2110,  
+                        coltype_rides_2109, coltype_rides_2108
+                        )
+
+coltype_all_df_transposed &lt;- t(coltype_all_df)
+View(coltype_all_df_transposed) </code></pre>
+</div>
+<div id="display-data-type-table-here-in-the-markdown-document" class="section level4">
+<h4>3.3 Display data type table here in the Markdown document</h4>
+<pre class="r"><code>knitr::kable(coltype_all_df_transposed, caption = &quot;Data types accross imported dataframes&quot;)</code></pre>
+<table>
+<caption>Data types accross imported dataframes</caption>
+<colgroup>
+<col width="8%" />
+<col width="5%" />
+<col width="7%" />
+<col width="6%" />
+<col width="5%" />
+<col width="10%" />
+<col width="9%" />
+<col width="9%" />
+<col width="8%" />
+<col width="5%" />
+<col width="5%" />
+<col width="4%" />
+<col width="4%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="left">ride_id</th>
+<th align="left">rideable_type</th>
+<th align="left">started_at</th>
+<th align="left">ended_at</th>
+<th align="left">start_station_name</th>
+<th align="left">start_station_id</th>
+<th align="left">end_station_name</th>
+<th align="left">end_station_id</th>
+<th align="left">start_lat</th>
+<th align="left">start_lng</th>
+<th align="left">end_lat</th>
+<th align="left">end_lng</th>
+<th align="left">member_casual</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Type_rides_2207</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="even">
+<td align="left">Type_rides_2206</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="odd">
+<td align="left">Type_rides_2205</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="even">
+<td align="left">Type_rides_2204</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="odd">
+<td align="left">Type_rides_2203</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="even">
+<td align="left">Type_rides_2202</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="odd">
+<td align="left">Type_rides_2201</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="even">
+<td align="left">Type_rides_2112</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="odd">
+<td align="left">Type_rides_2111</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="even">
+<td align="left">Type_rides_2110</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="odd">
+<td align="left">Type_rides_2109</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+<tr class="even">
+<td align="left">Type_rides_2108</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">character</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">numeric</td>
+<td align="left">character</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note: Before 2021, the IDs of start and end station are of
+numeric type. If ridership data up to 2020 were considered, the
+corresponding columns for start and end station ID in those imported
+dataframes should be updated to be of type character, to be consistent
+with post-2020 records. Such discrepancies could not be detected with
+functions like glimpse() after the subsequent step of combining
+dataframes.</em></p>
+</div>
+</div>
+<div id="step-4.-combine-the-raw-inspected-ridership-dataframes-into-a-single-dataframe" class="section level3">
+<h3>Step 4. Combine the raw (inspected) ridership dataframes into a
+single dataframe</h3>
+<p>In case they are needed, dataframes for months in 2021 and 2022 are
+first combined separately, then combined together. Hindsight revealed
+that combining all dataframes at once is also sufficient.</p>
+<pre class="r"><code># Combine ridership dataframes from 2022
+rides_masterdf_2022 &lt;- rbind(rides_2207, rides_2206, rides_2205, rides_2204, 
+                             rides_2203, rides_2202, rides_2201
+                             )
+
+# Combine ridership dataframes from 2021
+rides_masterdf_2021 &lt;- rbind(rides_2112, rides_2111, rides_2110, rides_2109, 
+                             rides_2108
+                             )
+
+# Combine all ridership dataframes
+rides_masterdf &lt;- rbind(rides_masterdf_2022, rides_masterdf_2021)
+
+# checked the newly combined dataframe
+glimpse(rides_masterdf) </code></pre>
+<pre><code>## Rows: 5,901,463
+## Columns: 13
+## $ ride_id            &lt;chr&gt; &quot;954144C2F67B1932&quot;, &quot;292E027607D218B6&quot;, &quot;5776585258…
+## $ rideable_type      &lt;chr&gt; &quot;classic_bike&quot;, &quot;classic_bike&quot;, &quot;classic_bike&quot;, &quot;cl…
+## $ started_at         &lt;chr&gt; &quot;2022-07-05 08:12:47&quot;, &quot;2022-07-26 12:53:38&quot;, &quot;2022…
+## $ ended_at           &lt;chr&gt; &quot;2022-07-05 08:24:32&quot;, &quot;2022-07-26 12:55:31&quot;, &quot;2022…
+## $ start_station_name &lt;chr&gt; &quot;Ashland Ave &amp; Blackhawk St&quot;, &quot;Buckingham Fountain …
+## $ start_station_id   &lt;chr&gt; &quot;13224&quot;, &quot;15541&quot;, &quot;15541&quot;, &quot;15541&quot;, &quot;TA1307000117&quot;,…
+## $ end_station_name   &lt;chr&gt; &quot;Kingsbury St &amp; Kinzie St&quot;, &quot;Michigan Ave &amp; 8th St&quot;…
+## $ end_station_id     &lt;chr&gt; &quot;KA1503000043&quot;, &quot;623&quot;, &quot;623&quot;, &quot;TA1307000164&quot;, &quot;TA13…
+## $ start_lat          &lt;dbl&gt; 41.90707, 41.86962, 41.86962, 41.86962, 41.89147, 4…
+## $ start_lng          &lt;dbl&gt; -87.66725, -87.62398, -87.62398, -87.62398, -87.626…
+## $ end_lat            &lt;dbl&gt; 41.88918, 41.87277, 41.87277, 41.79526, 41.93625, 4…
+## $ end_lng            &lt;dbl&gt; -87.63851, -87.62398, -87.62398, -87.59647, -87.652…
+## $ member_casual      &lt;chr&gt; &quot;member&quot;, &quot;casual&quot;, &quot;casual&quot;, &quot;casual&quot;, &quot;member&quot;, &quot;…</code></pre>
+</div>
+<div id="step-5.-remove-empty-spaces-and-rowsdatapoints" class="section level3">
+<h3>Step 5. Remove empty spaces and rows/datapoints</h3>
+<div id="clean-the-column-names" class="section level4">
+<h4>5.1. Clean the column names</h4>
+<pre class="r"><code>rides_masterdf_cleaned &lt;- clean_names(rides_masterdf) # column names now consist of only the _ character, numbers, and letters</code></pre>
+</div>
+<div id="optional-check-occurence-of-things-e.g.-blank-cells" class="section level4">
+<h4>5.2. [Optional] Check occurence of things (e.g. blank cells)</h4>
+<p>The following code would take a long time to run</p>
+<pre class="r"><code>tabyl(rides_masterdf_cleaned, &quot;ride_id&quot;)
+tabyl(rides_masterdf_cleaned, &quot;rideable_type&quot;)
+tabyl(rides_masterdf_cleaned, &quot;start_lat&quot;)
+tabyl(rides_masterdf_cleaned, &quot;ended_at&quot;)
+tabyl(rides_masterdf_cleaned, &quot;start_station_name&quot;)
+tabyl(rides_masterdf_cleaned, &quot;start_station_id&quot;)
+tabyl(rides_masterdf_cleaned, &quot;end_station_name&quot;)
+tabyl(rides_masterdf_cleaned, &quot;end_station_id&quot;)
+tabyl(rides_masterdf_cleaned, &quot;start_lat&quot;)
+tabyl(rides_masterdf_cleaned, &quot;start_lng&quot;)
+tabyl(rides_masterdf_cleaned, &quot;end_lat&quot;)
+tabyl(rides_masterdf_cleaned, &quot;end_lng&quot;)
+tabyl(rides_masterdf_cleaned, &quot;member_casual&quot;)</code></pre>
+</div>
+<div id="remove-empty-rowsdatapoints-and-empty-columns" class="section level4">
+<h4>5.3. Remove empty rows/datapoints (and empty columns)</h4>
+<pre class="r"><code># Remove empty rows and columns
+rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;% 
+  remove_empty(whic=c(&quot;rows&quot;))
+
+rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;% 
+  remove_empty(whic=c(&quot;cols&quot;))</code></pre>
+</div>
+</div>
+<div id="step-6.-remove-duplicated-data-points" class="section level3">
+<h3>Step 6. Remove duplicated data points</h3>
+<p>Check and remove ride ID duplicates</p>
+<pre class="r"><code># Check for ride ID duplicates
+ride_id_check &lt;- rides_masterdf_cleaned %&gt;%
+  count(ride_id) %&gt;%
+  filter(n &gt; 1)
+head(ride_id_check)</code></pre>
+<pre><code>## [1] ride_id n      
+## &lt;0 rows&gt; (or 0-length row.names)</code></pre>
+<pre class="r"><code>glimpse(ride_id_check)</code></pre>
+<pre><code>## Rows: 0
+## Columns: 2
+## $ ride_id &lt;chr&gt; 
+## $ n       &lt;int&gt;</code></pre>
+<pre class="r"><code># Remove ride ID duplicates
+rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;%
+  distinct(ride_id, .keep_all = TRUE) 
+
+# Check for remaining ride ID duplicates post-removal
+ride_id_check_nodup &lt;- rides_masterdf_cleaned %&gt;%
+  count(ride_id) %&gt;%
+  filter(n &gt; 1)
+head(ride_id_check_nodup)</code></pre>
+<pre><code>## [1] ride_id n      
+## &lt;0 rows&gt; (or 0-length row.names)</code></pre>
+<pre class="r"><code>glimpse(ride_id_check_nodup)</code></pre>
+<pre><code>## Rows: 0
+## Columns: 2
+## $ ride_id &lt;chr&gt; 
+## $ n       &lt;int&gt;</code></pre>
+</div>
+<div id="step-7.-remove-incompleteinvalid-rows-data-points" class="section level3">
+<h3>Step 7. Remove incomplete/invalid rows/ data points</h3>
+<div id="remove-rows-with-unknown-startend-station-names" class="section level4">
+<h4>7.1. Remove rows with unknown start/end station names</h4>
+<pre class="r"><code>rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;%
+  filter(
+    !(is.na(start_station_name) | start_station_name == &quot;&quot;)
+  ) %&gt;% 
+  
+  filter(
+    !(is.na(end_station_name) | end_station_name == &quot;&quot;)
+  )</code></pre>
+</div>
+<div id="remove-rows-that-record-test-rides" class="section level4">
+<h4>7.2. Remove rows that record test rides</h4>
+<p>The observation of test rides in the data and its respective code for
+cleaning is adopted from the previous work of <a href="https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html">Isabella
+Peel</a></p>
+<pre class="r"><code># Remove test rides (isabella peel)
+capitalized_station_name_check &lt;- rides_masterdf_cleaned %&gt;% 
+  filter(
+    str_detect(start_station_name, &quot;[:upper:]&quot;) &amp; !str_detect(start_station_name,&quot;[:lower:]&quot;)
+  ) %&gt;%
+  
+  group_by(
+    start_station_name
+  ) %&gt;%
+  
+  count(
+    start_station_name
+  )
+
+rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;%
+  filter(
+    !(str_detect(start_station_name, &quot;[:upper:]&quot;)
+      &amp; !str_detect(start_station_name, &quot;[:lower:]&quot;))
+  )</code></pre>
+</div>
+<div id="remove-rows-with-noincomplete-coordinates-for-start-and-end-stations" class="section level4">
+<h4>7.3. Remove rows with no/incomplete coordinates for start and end
+stations</h4>
+<pre class="r"><code>rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;%
+  filter(!is.na(start_lng) | !is.na(start_lat) | !is.na(end_lng) | !is.na(end_lat))</code></pre>
+</div>
+</div>
+<div id="step-8.-change-andor-supplement-data-types" class="section level3">
+<h3>Step 8. Change and/or supplement data types</h3>
+<p>Update data to appropriate types for subsequent calculations and
+manipulations; ensure chronological order of data through sorting
+(function arrange()).</p>
+<pre class="r"><code># Change start and end time to date/time from character to date (POSIX) type
+rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;%
+  mutate(started_at = as.POSIXct(started_at, format = &quot;%Y-%m-%d %H:%M:%S&quot;),
+         ended_at = as.POSIXct(ended_at, format = &quot;%Y-%m-%d %H:%M:%S&quot;)
+         )
+
+# Order ride data by date 
+rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;%
+  arrange(started_at)</code></pre>
+</div>
+<div id="step-9.-perform-preliminary-calculations-data-manipulations" class="section level3">
+<h3>Step 9. Perform preliminary calculations/ data manipulations</h3>
+<div id="calculate-ride-duration" class="section level4">
+<h4>9.1 Calculate ride duration</h4>
+<p>The code below cleaning is adopted from the previous work of <a href="https://isabellapeel.github.io/Cyclistic_Case_Study-Divvy_Bikes/Analysis_w_code.html">Isabella
+Peel</a></p>
+<pre class="r"><code># Calculate ride duration
+  rides_masterdf_cleaned$ride_duration &lt;- difftime(
+    rides_masterdf_cleaned$ended_at, 
+    rides_masterdf_cleaned$started_at,
+    units = &quot;secs&quot;
+  ) 
+  
+  # Change string type to numeric 
+  rides_masterdf_cleaned$ride_duration &lt;- as.numeric(
+    as.character(rides_masterdf_cleaned$ride_duration)
+    )
+
+# Remove rows with negative ride duration
+rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;%
+  filter(!(ride_duration &lt; 0))</code></pre>
+</div>
+<div id="calculate-ride-distance" class="section level4">
+<h4>9.2. Calculate ride distance</h4>
+<p>Ride distance is defined here as the geographical distance between
+the ride’s start and end stations, calculated from their given
+latitude-longitude. Though not the length of the exact route taken by
+the rider, this data could provide some insights on the user’s riding
+habits/intention.</p>
+<pre class="r"><code># Calculate ride distance 
+# NOTE: if a distance is 0, DO NOT remove it! riders may make a round trip!
+
+rides_masterdf_cleaned &lt;- rides_masterdf_cleaned %&gt;%
+  rowwise() %&gt;% 
+  mutate(ride_distance = distHaversine(cbind(start_lng, start_lat), 
+                                       cbind(end_lng, end_lat)
+                                       )
+         )</code></pre>
+</div>
+</div>
+<div id="step-10.-save-the-cleaned-dataset-and-other-relevant-datasets." class="section level3">
+<h3>Step 10. Save the cleaned dataset and other relevant datasets.<br />
+</h3>
+<div id="save-the-cleaned-dataset" class="section level4">
+<h4>10.1. Save the cleaned dataset</h4>
+<pre class="r"><code>fwrite(
+  rides_masterdf_cleaned, 
+  &quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/rides_masterdf_cleaned_221030.csv&quot;, 
+  col.names = TRUE,
+  row.names = FALSE
+  )</code></pre>
+</div>
+<div id="save-relevant-datasets" class="section level4">
+<h4>10.2. Save relevant datasets</h4>
+<pre class="r"><code>fwrite(
+  rides_masterdf, 
+  &quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/rides_masterdf_221030.csv&quot;, 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+
+fwrite(
+  coltype_all_df_transposed, 
+  &quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/coltype_all_df_transposed_221030.csv&quot;, 
+  col.names = TRUE,
+  row.names = FALSE
+  )</code></pre>
+<pre><code>## x being coerced from class: matrix to data.table</code></pre>
+<pre class="r"><code>fwrite(
+  ride_id_check, 
+  &quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/ride_id_check_221030.csv&quot;, 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+
+fwrite(
+  ride_id_check_nodup, 
+  &quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/ride_id_check_nodup_221030.csv&quot;, 
+  col.names = TRUE,
+  row.names = FALSE
+  )
+
+fwrite(
+  capitalized_station_name_check, 
+  &quot;C:/Users/phucm/OneDrive/My Stuffs/Academic Materials/Books and Materials_by time period/2018-2020_RWTH-AACHEN/01_ADDITIONAL CLASSES/Coursera_Google-CC_Data-Analytics/C08_Capstone/CS1_Produced-Dataframes/capitalized_station_name_check_221030.csv&quot;, 
+  col.names = TRUE,
+  row.names = FALSE
+  )</code></pre>
+</div>
+</div>
 </div>
 
 
