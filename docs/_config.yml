@@ -28,6 +28,7 @@ baseurl: "/GPC_Case-Study-1" # the subpath of your site, e.g. /blog
 url: "https://phucminhle93.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: jekyllrb
 github_username:  phucminhle93
+linkedin_username: phuc-le-45a91082
 
 # Build settings
 theme: minima
