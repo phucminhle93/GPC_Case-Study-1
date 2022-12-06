@@ -4,9 +4,7 @@ title: Overview
 permalink: /Overview/
 ---
 
-## Summary
-
-The Bike Share Case Study is the capstone assignment of the Google Data Analytics Certificate. Its completion marks my successful conclusion of the course and helps showcase some of the skills I have obtained.
+The **[Bike Share Case Study](https://phucminhle93.github.io/GPC_Case-Study-1/)** is the capstone assignment of the Google Data Analytics Certificate. Its completion marks my successful conclusion of the course and helps showcase some of the skills I have obtained.
 
 ## Description of Case Study
 
