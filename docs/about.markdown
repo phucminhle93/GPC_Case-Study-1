@@ -1,6 +1,6 @@
 ---
 layout: page
-title: The Bike Share Case Study
+title: Overview
 permalink: /Overview/
 ---
 
