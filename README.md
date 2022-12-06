@@ -1,12 +1,4 @@
----
-title: "Bike Share Case Study"
-author: "Phuc Le"
-date: "2022-12-05"
-output:
-  html_document: 
-    toc: TRUE
----
-
+# Bike Share Case Study
 ## Summary
 
 The Bike Share Case Study is the capstone assignment of the Google Data Analytics Certificate. Its completion marks my successful conclusion of the course and helps showcase some of the skills I have obtained.
