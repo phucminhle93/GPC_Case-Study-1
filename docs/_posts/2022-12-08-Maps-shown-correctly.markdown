@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "Interactive Maps worked!"
+title:  "Interactive Maps finally worked!"
 date:   2022-12-08 13:05:00 +0100
 categories: Site Update
 ---
 
-The interactive maps in Visualization 1 finally displays correctly and can be played with! The previous display failure was due to a build warning when Github was (re)building the website following push:
+The interactive maps in [Visualization - Maps](https://phucminhle93.github.io/GPC_Case-Study-1/Viz-Maps.html) finally displays correctly and can be played with! The previous display failure was due to a build warning when Github was (re)building the website following push:
 
 ```
 Liquid Warning: Liquid syntax error (line 470): Unexpected character & in "{{if(t&&"string"==typeof t)return u.hasOwnProperty(t)||(u[t]=new a(t)),u[t];if("object"===(void 0===t?"undefined":r(t))&&t._vars&&t.var)return t;if(Array.isArray(t)&&1==t.length&&"string"==typeof t[0])return e(t[0]);throw new Error("Invalid groupName argument")}}" in Viz-Maps.html
@@ -22,3 +22,5 @@ To fix this:
     3. Add a space between "\{\{" and "\}\}" so they become "{ {" and "} }" 
 
     4. Save the file and update the changes (git add, git commit, git push) 
+
+Moral of the story: If a page-build failure occurs after git push, a lot of troubleshooting time could be saved by first checking the build log (under the "Action" tab of the repo) before moving on to exploring other possible causes/solutions. 
