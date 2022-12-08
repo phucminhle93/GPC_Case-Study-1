@@ -21,7 +21,7 @@ This case study simulates a supposed real-life assignment of a marketing analyst
 
 ## Assignment
 
-The Assignment of this case study was also detailed in writng in the Certificate Program and is repeated below:
+The Assignment of this case study was also detailed in writng in the Certificate program and is repeated below:
 
 > Three questions will guide the future marketing program:
 >    1. How do annual members and casual riders use Cyclistic bikes differently?
