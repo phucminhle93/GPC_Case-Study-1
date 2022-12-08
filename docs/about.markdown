@@ -9,7 +9,7 @@ The **Bike Share Case Study** is the capstone assignment of the Google Data Anal
 
 ## Scenario
 
-This case study simulates an supposed real-life assignment of a marketing analyst at the fictional company Cyclistics, which offers bike-share service in the Chicago area. In the Google Data Analytics Certificate Program, description of the company was provided in writing and is repeated below. However, in completing this case study using more recent data, it appears some of the statements in the description - such as the available bike types and the number of stations within the network - are no longer valid.
+This case study simulates a supposed real-life assignment of a marketing analyst at the fictional company Cyclistics, which offers bike-share service in the Chicago area. In the Google Data Analytics Certificate Program, the description of the scenario was provided in writing and is repeated below. However, in completing this case study using more recent data, it appears some of the statements in the description - such as the available bike types and the number of stations within the network - are no longer valid.
 
 > In 2016, Cyclistic launched a successful bike-share offering. Since then, the program has grown to a fleet of 5,824 bicycles that are geotracked and locked into a network of 692 stations across Chicago. The bikes can be unlocked from one station and returned to any other station in the system anytime.
 > 
