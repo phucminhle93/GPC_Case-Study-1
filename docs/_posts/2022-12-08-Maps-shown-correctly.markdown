@@ -19,7 +19,7 @@ To fix this:
 
     2. Search for the code line that gave the warning 
 
-    3. Add a space between "\{\{" and "\}\}" so they become "{ {" and "} }" 
+    3. Add a space between "{{" and "}}" so they become "{ {" and "} }" 
 
     4. Save the file and update the changes (git add, git commit, git push) 
 
