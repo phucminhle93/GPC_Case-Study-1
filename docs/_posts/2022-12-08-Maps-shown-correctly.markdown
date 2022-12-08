@@ -5,7 +5,7 @@ date:   2022-12-06 13:05:00 +0100
 categories: Site Update
 ---
 
-The interactive maps in Visualization 1 finally work! The previous failure was due to a build warning when Github was (re)building the website following push:
+The interactive maps in Visualization 1 finally displays correctly and can be played with! The previous display failure was due to a build warning when Github was (re)building the website following push:
 
 ```
 Liquid Warning: Liquid syntax error (line 470): Unexpected character & in "{{if(t&&"string"==typeof t)return u.hasOwnProperty(t)||(u[t]=new a(t)),u[t];if("object"===(void 0===t?"undefined":r(t))&&t._vars&&t.var)return t;if(Array.isArray(t)&&1==t.length&&"string"==typeof t[0])return e(t[0]);throw new Error("Invalid groupName argument")}}" in Viz-Maps.html
