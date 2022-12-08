@@ -14,6 +14,7 @@ Liquid Warning: Liquid syntax error (line 470): Unexpected character & in "{{if(
 The warning shows that there is this unexpected character "&" in a line in a certain .html file. This file happens to be the one that displays the interactive maps.
 
 To fix this:
-    1. Go to the .html file where the warning occurs (in this case, it's Viz-Map.html which has the interactive maps)
-    2. Add a space between `{{` and `}}` so they become `{ {` and `} }`
-    3. Save the file and update the changes (git add, git commit, git push)
+    1. Go to the .html file where the warning occurs (in this case, it's Viz-Map.html which has the interactive maps) 
+    2. Search for the code line that gave the warning 
+    3. Add a space between "{{" and "}}" so they become "{ {" and "} }" 
+    4. Save the file and update the changes (git add, git commit, git push) 
