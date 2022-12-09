@@ -1,0 +1,4 @@
+Sitemap: https://phucminhle93.github.io/GPC_Case-Study-1/sitemap.xml
+
+User-agent: *
+Disallow:
