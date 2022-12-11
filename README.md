@@ -10,3 +10,5 @@ In the Bike Share case study, the historical [Ridership Record](https://divvy-tr
 The case study is carried out in four steps. First, the necessary raw data from Cyclistics is downloaded and cleaned (1). The cleaned data is then transformed (2) and visualized (3) to address relevant aspects of Cyclistics' ride-share service. Finally, the insights are documented in a final report (4).
 
 All steps of the case study are carried out using the programming language R due to its ease of use, versatility, cost efficiency, as well as the high availability of communities and resources.
+
+The final documentation and report can be found at: https://phucminhle93.github.io/GPC_Case-Study-1/
